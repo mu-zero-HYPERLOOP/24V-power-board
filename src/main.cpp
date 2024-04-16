@@ -80,6 +80,7 @@ int main() {
   canzero_set_warn_mcu_over_temperature(error_flag_OK);
 
   canzero_set_sdc_status(sdc_status_OPEN);
+  pdu24::set_sdc(false);
   canzero_set_mcu_temperature(0);
   canzero_set_total_current(0);
   canzero_set_power_estimation(0);
@@ -171,51 +172,37 @@ int main() {
         pdu24::status(hp1) == SHORT || pdu24::status(hp2) == SHORT ||
         pdu24::status(hp3) == SHORT || pdu24::status(hp4) == SHORT;
 
-    if (any_short) {
-      pdu24::control(hp1, false);
-      pdu24::control(hp2, false);
-      pdu24::control(hp3, false);
-      pdu24::control(hp4, false);
-      pdu24::control(lp1, false);
-      pdu24::control(lp2, false);
-      pdu24::control(lp3, false);
-      pdu24::control(lp4, false);
-      pdu24::control(lp5, false);
-      pdu24::control(lp6, false);
-      pdu24::control(lp7, false);
-      pdu24::control(lp8, false);
-      pdu24::control(lp9, false);
-      pdu24::control(lp10, false);
-    } else {
-      pdu24::control(hp1, canzero_get_hp_channel1_control() ==
-                              pdu_channel_control_ON);
-      pdu24::control(hp2, canzero_get_hp_channel2_control() ==
-                              pdu_channel_control_ON);
-      pdu24::control(hp3, canzero_get_hp_channel3_control() ==
-                              pdu_channel_control_ON);
-      pdu24::control(hp4, canzero_get_hp_channel4_control() ==
-                              pdu_channel_control_ON);
-      pdu24::control(lp1, canzero_get_lp_channel1_control() ==
-                              pdu_channel_control_ON);
-      pdu24::control(lp2, canzero_get_lp_channel2_control() ==
-                              pdu_channel_control_ON);
-      pdu24::control(lp3, canzero_get_lp_channel3_control() ==
-                              pdu_channel_control_ON);
-      pdu24::control(lp4, canzero_get_lp_channel4_control() ==
-                              pdu_channel_control_ON);
-      pdu24::control(lp5, canzero_get_lp_channel5_control() ==
-                              pdu_channel_control_ON);
-      pdu24::control(lp6, canzero_get_lp_channel6_control() ==
-                              pdu_channel_control_ON);
-      pdu24::control(lp7, canzero_get_lp_channel7_control() ==
-                              pdu_channel_control_ON);
-      pdu24::control(lp8, canzero_get_lp_channel8_control() ==
-                              pdu_channel_control_ON);
-      pdu24::control(lp9, canzero_get_lp_channel9_control() ==
-                              pdu_channel_control_ON);
-      pdu24::control(lp10, canzero_get_lp_channel10_control() ==
-                               pdu_channel_control_ON);
-    }
+    pdu24::set_sdc(!any_short);
+    canzero_set_sdc_status(any_short ? sdc_status_OPEN : sdc_status_CLOSED);
+
+    pdu24::control(hp1,
+                   canzero_get_hp_channel1_control() == pdu_channel_control_ON);
+    pdu24::control(hp2,
+                   canzero_get_hp_channel2_control() == pdu_channel_control_ON);
+    pdu24::control(hp3,
+                   canzero_get_hp_channel3_control() == pdu_channel_control_ON);
+    pdu24::control(hp4,
+                   canzero_get_hp_channel4_control() == pdu_channel_control_ON);
+    pdu24::control(lp1,
+                   canzero_get_lp_channel1_control() == pdu_channel_control_ON);
+    pdu24::control(lp2,
+                   canzero_get_lp_channel2_control() == pdu_channel_control_ON);
+    pdu24::control(lp3,
+                   canzero_get_lp_channel3_control() == pdu_channel_control_ON);
+    pdu24::control(lp4,
+                   canzero_get_lp_channel4_control() == pdu_channel_control_ON);
+    pdu24::control(lp5,
+                   canzero_get_lp_channel5_control() == pdu_channel_control_ON);
+    pdu24::control(lp6,
+                   canzero_get_lp_channel6_control() == pdu_channel_control_ON);
+    pdu24::control(lp7,
+                   canzero_get_lp_channel7_control() == pdu_channel_control_ON);
+    pdu24::control(lp8,
+                   canzero_get_lp_channel8_control() == pdu_channel_control_ON);
+    pdu24::control(lp9,
+                   canzero_get_lp_channel9_control() == pdu_channel_control_ON);
+    pdu24::control(lp10, canzero_get_lp_channel10_control() ==
+                             pdu_channel_control_ON);
 
     mcu_temp_filter.push(pdu24::read_mcu_temperature());
     Temperature mcu_temp = mcu_temp_filter.get();
@@ -248,8 +235,8 @@ int main() {
   }
 }
 
-void __assert_func (const char *, int, const char *, const char *) {
-  while(true) {
+void __assert_func(const char *, int, const char *, const char *) {
+  while (true) {
     Serial.println("FUCKED");
   }
 }
