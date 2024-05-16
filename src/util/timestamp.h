@@ -1,7 +1,7 @@
 #pragma once
 
-#include <Arduino.h>
 #include "metrics.h"
+#include <chrono>
 #include <cstdint>
 
 class Timestamp {
@@ -22,8 +22,14 @@ class Timestamp {
                              const class Timestamp &);
 
 public:
-  inline static Timestamp now() { return Timestamp(micros()); }
+  inline static Timestamp now() {
+    using namespace std::chrono;
+    milliseconds x =
+        duration_cast<milliseconds>(system_clock::now().time_since_epoch());
+    return Timestamp(x.count());
+  }
 
+  Timestamp() = default;
   Timestamp(const Timestamp &o) : Timestamp(o.m_time_us) {}
   Timestamp(const volatile Timestamp &o) : Timestamp(o.m_time_us) {}
   Timestamp(Timestamp &&o) : Timestamp(o.m_time_us) {}
@@ -91,6 +97,13 @@ class Duration {
   friend Duration operator-(const volatile Duration &, const Duration &);
 
 public:
+  static Duration from_s(float s) {
+    return Duration(s * 1000000);
+  }
+  static Duration from_ms(uint32_t ms) {
+    return Duration(ms * 1000);
+  }
+
   constexpr Duration() : m_us(0) {}
   constexpr Duration(Time x)
       : m_us(static_cast<uint32_t>(static_cast<float>(x) * 1e6)) {}
