@@ -210,52 +210,60 @@ typedef struct {
   get_resp_header m_header;
   uint32_t m_data;
 } canzero_message_get_resp;
-static const uint32_t canzero_message_get_resp_id = 0x9E;
+static const uint32_t canzero_message_get_resp_id = 0xBE;
 typedef struct {
   set_resp_header m_header;
 } canzero_message_set_resp;
-static const uint32_t canzero_message_set_resp_id = 0xBE;
+static const uint32_t canzero_message_set_resp_id = 0xDE;
 typedef struct {
   pdu_state m_state;
   sdc_status m_sdc_status;
 } canzero_message_power_board24_stream_state;
-static const uint32_t canzero_message_power_board24_stream_state_id = 0x44;
+static const uint32_t canzero_message_power_board24_stream_state_id = 0x4B;
 typedef struct {
   float m_mcu_temperature;
 } canzero_message_power_board24_stream_temperature;
-static const uint32_t canzero_message_power_board24_stream_temperature_id = 0x4B;
+static const uint32_t canzero_message_power_board24_stream_temperature_id = 0x70;
 typedef struct {
   error_flag m_assertion_fault;
   error_level m_error_level_mcu_temperature;
 } canzero_message_power_board24_stream_errors;
-static const uint32_t canzero_message_power_board24_stream_errors_id = 0x6C;
+static const uint32_t canzero_message_power_board24_stream_errors_id = 0x50;
 typedef struct {
   pdu_channel_status m_cooling_pump_channel_status;
   pdu_channel_status m_sdc_power_channel_status;
   pdu_channel_status m_sdc_signal_channel_status;
   pdu_channel_status m_fan_channel_status;
 } canzero_message_power_board24_stream_channel_status;
-static const uint32_t canzero_message_power_board24_stream_channel_status_id = 0x4C;
+static const uint32_t canzero_message_power_board24_stream_channel_status_id = 0x91;
 typedef struct {
   float m_cooling_pump_channel_current;
   float m_sdc_power_channel_current;
   float m_sdc_signal_channel_current;
   float m_fan_channel_current;
 } canzero_message_power_board24_stream_channel_currents;
-static const uint32_t canzero_message_power_board24_stream_channel_currents_id = 0x6D;
+static const uint32_t canzero_message_power_board24_stream_channel_currents_id = 0x71;
 typedef struct {
   node_id m_node_id;
-} canzero_message_heartbeat;
-static const uint32_t canzero_message_heartbeat_id = 0xDF;
+  uint8_t m_unregister;
+  uint8_t m_ticks_next;
+} canzero_message_heartbeat_can0;
+static const uint32_t canzero_message_heartbeat_can0_id = 0xEA;
+typedef struct {
+  node_id m_node_id;
+  uint8_t m_unregister;
+  uint8_t m_ticks_next;
+} canzero_message_heartbeat_can1;
+static const uint32_t canzero_message_heartbeat_can1_id = 0xE9;
 typedef struct {
   get_req_header m_header;
 } canzero_message_get_req;
-static const uint32_t canzero_message_get_req_id = 0x9F;
+static const uint32_t canzero_message_get_req_id = 0xBF;
 typedef struct {
   set_req_header m_header;
   uint32_t m_data;
 } canzero_message_set_req;
-static const uint32_t canzero_message_set_req_id = 0xBF;
+static const uint32_t canzero_message_set_req_id = 0xDF;
 void canzero_can0_poll();
 void canzero_can1_poll();
 uint32_t canzero_update_continue(uint32_t delta_time);

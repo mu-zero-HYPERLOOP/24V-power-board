@@ -13,6 +13,8 @@ set(CMAKE_CXX_STANDARD 20)
 add_executable(${PROJECT_NAME} 
   mock/main.cpp
   mock/can.cpp
+  mock/pdu.cpp
+  src/channel_control.cpp
   src/canzero/canzero.cpp
 )
 

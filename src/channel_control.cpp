@@ -75,10 +75,10 @@ void channel_control() {
                  canzero_get_fan_channel_ctrl() == pdu_channel_control_ON);
   if (fan_sense_interval.next()) {
     fan_current_filter.push(pdu24::sense(FAN_CHANNEL));
-    canzero_set_sdc_signal_channel_current(
+    canzero_set_fan_channel_current(
         static_cast<float>(fan_current_filter.get()));
   }
-  canzero_set_sdc_signal_channel_status(
+  canzero_set_fan_channel_status(
       pdu24_status_to_canzero_status(pdu24::status(FAN_CHANNEL)));
 }
 
