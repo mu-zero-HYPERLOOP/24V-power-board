@@ -40,6 +40,8 @@ public:
 
   static bool any_short();
 
+  static Power total_power_output();
+
 private:
   static constexpr int CHANNEL_COUNT = 14;
 

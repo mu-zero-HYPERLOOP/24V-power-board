@@ -3,6 +3,7 @@
 #include <Arduino.h>
 #include <InternalTemperature.h>
 #include <algorithm>
+#include <numeric>
 
 std::array<Current, pdu24::CHANNEL_COUNT> pdu24::m_currents;
 std::array<bool, pdu24::CHANNEL_COUNT> pdu24::m_shorts;
@@ -187,4 +188,9 @@ Temperature pdu24::read_mcu_temperature() {
 bool pdu24::any_short() {
   return std::any_of(m_shorts.begin(), m_shorts.end(),
                      [](auto x) { return x; });
+}
+
+Power pdu24::total_power_output() {
+  return std::accumulate(m_currents.begin(), m_currents.end(), Power(0),
+      [](Power p, Current c) { return p + Voltage(24) * c; });
 }

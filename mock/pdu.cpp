@@ -57,3 +57,8 @@ bool pdu24::any_short() {
   return std::any_of(m_shorts.begin(), m_shorts.end(),
                      [](auto x) { return x; });
 }
+
+Power pdu24::total_power_output() {
+  return std::accumulate(m_currents.begin(), m_currents.end(), Power(0),
+      [](Power p, Current c) { return p + Voltage(24) * c; });
+}

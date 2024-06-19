@@ -22,6 +22,9 @@ static BoxcarFilter<Current, DEFAULT_FILTER_SIZE>
 static Interval fan_sense_interval(DEFAULT_SENSE_FREQUENCY);
 static BoxcarFilter<Current, DEFAULT_FILTER_SIZE> fan_current_filter(0_A);
 
+static Interval power_sense_interval(DEFAULT_SENSE_FREQUENCY);
+static BoxcarFilter<Power, DEFAULT_FILTER_SIZE> total_power_filter(0_W);
+
 
 static pdu_channel_status
 pdu24_status_to_canzero_status(pdu24_channel_status status) {
@@ -48,15 +51,15 @@ void channel_control() {
   canzero_set_cooling_pump_channel_status(
       pdu24_status_to_canzero_status(pdu24::status(COOLING_PUMP_CHANNEL)));
 
-  // ========== SDC POWER ==========
-  pdu24::control(SDC_POWER_CHANNEL, canzero_get_sdc_power_channel_ctrl() ==
+  // ========== SDC BOARD POWER ==========
+  pdu24::control(SDC_POWER_CHANNEL, canzero_get_sdc_board_power_channel_ctrl() ==
                                         pdu_channel_control_ON);
   if (sdc_power_sense_interval.next()) {
     sdc_power_current_filter.push(pdu24::sense(SDC_POWER_CHANNEL));
-    canzero_set_sdc_power_channel_current(
+    canzero_set_sdc_board_power_channel_current(
         static_cast<float>(sdc_power_current_filter.get()));
   }
-  canzero_set_sdc_power_channel_status(
+  canzero_set_sdc_board_power_channel_status(
       pdu24_status_to_canzero_status(pdu24::status(SDC_POWER_CHANNEL)));
 
   // ========== SDC SIGNAL ==========
@@ -80,5 +83,11 @@ void channel_control() {
   }
   canzero_set_fan_channel_status(
       pdu24_status_to_canzero_status(pdu24::status(FAN_CHANNEL)));
+
+
+  if (power_sense_interval.next()) {
+    total_power_filter.push(pdu24::total_power_output());
+    canzero_set_total_power(static_cast<float>(total_power_filter.get()));
+  }
 }
 
