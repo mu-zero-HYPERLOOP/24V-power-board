@@ -1,3 +1,4 @@
 #pragma once
 
-void channel_control();
+#include "canzero/canzero.h"
+pdu_24v_state channel_control();

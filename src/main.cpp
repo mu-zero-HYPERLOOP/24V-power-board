@@ -12,7 +12,7 @@
 #include "util/boxcar.h"
 #include "util/interval.h"
 #include "util/timing.h"
-#include <Arduino.h>
+#include <cstdio>
 
 static IntervalTiming main_loop_interval_timer;
 
@@ -31,14 +31,19 @@ int main() {
 
   pdu24::begin();
 
-  canzero_set_state(pdu_24v_state_RUNNING);
+  canzero_set_state(pdu_24v_state_CHANNELS_OFF);
+  pdu_24v_state next_state = pdu_24v_state_CHANNELS_OFF;
+  canzero_set_command(pdu_24v_command_STOP);
+  printf("%d\n", canzero_get_state());
   while (true) {
 
     canzero_can0_poll();
     canzero_can1_poll();
 
     pdu24::update();
-    channel_control();
+    canzero_set_state(next_state);
+    next_state = channel_control();
+    printf("%d\n", canzero_get_state());
 
     // =========== SDC CTRL =========
     bool any_short = pdu24::any_short();

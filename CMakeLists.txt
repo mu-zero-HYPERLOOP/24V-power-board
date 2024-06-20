@@ -11,7 +11,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 20)
 
 add_executable(${PROJECT_NAME} 
-  mock/main.cpp
+  src/main.cpp
   mock/can.cpp
   mock/pdu.cpp
   src/channel_control.cpp

@@ -16,18 +16,15 @@ uint64_t DMAMEM __oe_config_hash;
 date_time DMAMEM __oe_build_time;
 pdu_24v_state DMAMEM __oe_state;
 sdc_status DMAMEM __oe_sdc_status;
+pdu_24v_command DMAMEM __oe_command;
 error_flag DMAMEM __oe_assertion_fault;
 double DMAMEM __oe_loop_frequency;
-pdu_channel_control DMAMEM __oe_cooling_pump_channel_ctrl;
 float DMAMEM __oe_cooling_pump_channel_current;
 pdu_channel_status DMAMEM __oe_cooling_pump_channel_status;
-pdu_channel_control DMAMEM __oe_sdc_board_power_channel_ctrl;
 float DMAMEM __oe_sdc_board_power_channel_current;
 pdu_channel_status DMAMEM __oe_sdc_board_power_channel_status;
-pdu_channel_control DMAMEM __oe_sdc_signal_channel_ctrl;
 float DMAMEM __oe_sdc_signal_channel_current;
 pdu_channel_status DMAMEM __oe_sdc_signal_channel_status;
-pdu_channel_control DMAMEM __oe_fan_channel_ctrl;
 float DMAMEM __oe_fan_channel_current;
 pdu_channel_status DMAMEM __oe_fan_channel_status;
 error_flag DMAMEM __oe_error_any_short;
@@ -69,8 +66,8 @@ static void canzero_serialize_canzero_message_power_board24_stream_state(canzero
   }
   frame->id = 0x47;
   frame->dlc = 1;
-  ((uint32_t*)data)[0] = (uint8_t)(msg->m_state & (0xFF >> (8 - 1)));
-  ((uint32_t*)data)[0] |= (uint8_t)(msg->m_sdc_status & (0xFF >> (8 - 1))) << 1;
+  ((uint32_t*)data)[0] = (uint8_t)(msg->m_state & (0xFF >> (8 - 2)));
+  ((uint32_t*)data)[0] |= (uint8_t)(msg->m_sdc_status & (0xFF >> (8 - 1))) << 2;
 }
 static void canzero_serialize_canzero_message_power_board24_stream_temperature(canzero_message_power_board24_stream_temperature* msg, canzero_frame* frame) {
   uint8_t* data = frame->data;
@@ -186,6 +183,10 @@ static void canzero_deserialize_canzero_message_set_req(canzero_frame* frame, ca
   msg->m_header.m_client_id = ((((uint32_t*)data)[0] >> 16) & (0xFFFFFFFF >> (32 - 8)));
   msg->m_header.m_server_id = ((((uint32_t*)data)[0] >> 24) & (0xFFFFFFFF >> (32 - 8)));
   msg->m_data = (((uint32_t*)data)[1] & (0xFFFFFFFF >> (32 - 32)));
+}
+static void canzero_deserialize_canzero_message_mother_board_stream_pdu_24v_command(canzero_frame* frame, canzero_message_mother_board_stream_pdu_24v_command* msg) {
+  uint8_t* data = frame->data;
+  msg->m_power_board24_command = (pdu_24v_command)(((uint32_t*)data)[0] & (0xFFFFFFFF >> (32 - 2)));
 }
 static void canzero_deserialize_canzero_message_heartbeat_can0(canzero_frame* frame, canzero_message_heartbeat_can0* msg) {
   uint8_t* data = frame->data;
@@ -692,7 +693,7 @@ static PROGMEM void canzero_handle_get_req(canzero_frame* frame) {
     break;
   }
   case 2: {
-    resp.m_data |= ((uint32_t)(((uint8_t)__oe_state) & (0xFF >> (8 - 1)))) << 0;
+    resp.m_data |= ((uint32_t)(((uint8_t)__oe_state) & (0xFF >> (8 - 2)))) << 0;
     resp.m_header.m_sof = 1;
     resp.m_header.m_eof = 1;
     resp.m_header.m_toggle = 0;
@@ -706,13 +707,20 @@ static PROGMEM void canzero_handle_get_req(canzero_frame* frame) {
     break;
   }
   case 4: {
-    resp.m_data |= ((uint32_t)(((uint8_t)__oe_assertion_fault) & (0xFF >> (8 - 1)))) << 0;
+    resp.m_data |= ((uint32_t)(((uint8_t)__oe_command) & (0xFF >> (8 - 2)))) << 0;
     resp.m_header.m_sof = 1;
     resp.m_header.m_eof = 1;
     resp.m_header.m_toggle = 0;
     break;
   }
   case 5: {
+    resp.m_data |= ((uint32_t)(((uint8_t)__oe_assertion_fault) & (0xFF >> (8 - 1)))) << 0;
+    resp.m_header.m_sof = 1;
+    resp.m_header.m_eof = 1;
+    resp.m_header.m_toggle = 0;
+    break;
+  }
+  case 6: {
     {
       uint64_t masked = (min_u64((__oe_loop_frequency - ((double)0)) / (double)0.00000000005421010862427522, 0xFFFFFFFFFFFFFFFFull) & (0xFFFFFFFFFFFFFFFF >> (64 - 64)));
       __oe_loop_frequency_rx_fragmentation_buffer[0] = ((uint32_t*)&masked)[0];
@@ -722,14 +730,7 @@ static PROGMEM void canzero_handle_get_req(canzero_frame* frame) {
     resp.m_header.m_sof = 1;
     resp.m_header.m_eof = 0;
     resp.m_header.m_toggle = 0;
-    schedule_get_resp_fragmentation_job(__oe_loop_frequency_rx_fragmentation_buffer, 2, 5, msg.m_header.m_client_id);
-    break;
-  }
-  case 6: {
-    resp.m_data |= ((uint32_t)(((uint8_t)__oe_cooling_pump_channel_ctrl) & (0xFF >> (8 - 1)))) << 0;
-    resp.m_header.m_sof = 1;
-    resp.m_header.m_eof = 1;
-    resp.m_header.m_toggle = 0;
+    schedule_get_resp_fragmentation_job(__oe_loop_frequency_rx_fragmentation_buffer, 2, 6, msg.m_header.m_client_id);
     break;
   }
   case 7: {
@@ -747,90 +748,69 @@ static PROGMEM void canzero_handle_get_req(canzero_frame* frame) {
     break;
   }
   case 9: {
-    resp.m_data |= ((uint32_t)(((uint8_t)__oe_sdc_board_power_channel_ctrl) & (0xFF >> (8 - 1)))) << 0;
-    resp.m_header.m_sof = 1;
-    resp.m_header.m_eof = 1;
-    resp.m_header.m_toggle = 0;
-    break;
-  }
-  case 10: {
     resp.m_data |= min_u32((__oe_sdc_board_power_channel_current - (0)) / 0.0392156862745098, 0xFF) << 0;
     resp.m_header.m_sof = 1;
     resp.m_header.m_eof = 1;
     resp.m_header.m_toggle = 0;
     break;
   }
-  case 11: {
+  case 10: {
     resp.m_data |= ((uint32_t)(((uint8_t)__oe_sdc_board_power_channel_status) & (0xFF >> (8 - 2)))) << 0;
     resp.m_header.m_sof = 1;
     resp.m_header.m_eof = 1;
     resp.m_header.m_toggle = 0;
     break;
   }
-  case 12: {
-    resp.m_data |= ((uint32_t)(((uint8_t)__oe_sdc_signal_channel_ctrl) & (0xFF >> (8 - 1)))) << 0;
-    resp.m_header.m_sof = 1;
-    resp.m_header.m_eof = 1;
-    resp.m_header.m_toggle = 0;
-    break;
-  }
-  case 13: {
+  case 11: {
     resp.m_data |= min_u32((__oe_sdc_signal_channel_current - (0)) / 0.0196078431372549, 0xFF) << 0;
     resp.m_header.m_sof = 1;
     resp.m_header.m_eof = 1;
     resp.m_header.m_toggle = 0;
     break;
   }
-  case 14: {
+  case 12: {
     resp.m_data |= ((uint32_t)(((uint8_t)__oe_sdc_signal_channel_status) & (0xFF >> (8 - 2)))) << 0;
     resp.m_header.m_sof = 1;
     resp.m_header.m_eof = 1;
     resp.m_header.m_toggle = 0;
     break;
   }
-  case 15: {
-    resp.m_data |= ((uint32_t)(((uint8_t)__oe_fan_channel_ctrl) & (0xFF >> (8 - 1)))) << 0;
-    resp.m_header.m_sof = 1;
-    resp.m_header.m_eof = 1;
-    resp.m_header.m_toggle = 0;
-    break;
-  }
-  case 16: {
+  case 13: {
     resp.m_data |= min_u32((__oe_fan_channel_current - (0)) / 0.00007629510948348211, 0xFFFF) << 0;
     resp.m_header.m_sof = 1;
     resp.m_header.m_eof = 1;
     resp.m_header.m_toggle = 0;
     break;
   }
-  case 17: {
+  case 14: {
     resp.m_data |= ((uint32_t)(((uint8_t)__oe_fan_channel_status) & (0xFF >> (8 - 2)))) << 0;
     resp.m_header.m_sof = 1;
     resp.m_header.m_eof = 1;
     resp.m_header.m_toggle = 0;
     break;
   }
-  case 18: {
+  case 15: {
     resp.m_data |= ((uint32_t)(((uint8_t)__oe_error_any_short) & (0xFF >> (8 - 1)))) << 0;
     resp.m_header.m_sof = 1;
     resp.m_header.m_eof = 1;
     resp.m_header.m_toggle = 0;
     break;
   }
-  case 19: {
+  case 16: {
     resp.m_data |= min_u32((__oe_mcu_temperature - (-1)) / 0.592156862745098, 0xFF) << 0;
     resp.m_header.m_sof = 1;
     resp.m_header.m_eof = 1;
     resp.m_header.m_toggle = 0;
     break;
   }
-  case 20: {
+  case 17: {
     resp.m_data |= ((uint32_t)(((uint8_t)__oe_error_level_mcu_temperature) & (0xFF >> (8 - 2)))) << 0;
     resp.m_header.m_sof = 1;
     resp.m_header.m_eof = 1;
     resp.m_header.m_toggle = 0;
     break;
   }
-  case 21: {
+  case 18: {
     __oe_error_level_config_mcu_temperature_rx_fragmentation_buffer[0] = (min_u32((__oe_error_level_config_mcu_temperature.m_info_thresh - ((float)-1000)) / (float)0.0000004656612874161595, 0xFFFFFFFFul) & (0xFFFFFFFF >> (32 - 32)));
     __oe_error_level_config_mcu_temperature_rx_fragmentation_buffer[1] = (min_u32((__oe_error_level_config_mcu_temperature.m_info_timeout - ((float)0)) / (float)0.000000013969838622484784, 0xFFFFFFFFul) & (0xFFFFFFFF >> (32 - 32)));
     __oe_error_level_config_mcu_temperature_rx_fragmentation_buffer[2] = (min_u32((__oe_error_level_config_mcu_temperature.m_warning_thresh - ((float)-1000)) / (float)0.0000004656612874161595, 0xFFFFFFFFul) & (0xFFFFFFFF >> (32 - 32)));
@@ -845,10 +825,10 @@ static PROGMEM void canzero_handle_get_req(canzero_frame* frame) {
     resp.m_header.m_sof = 1;
     resp.m_header.m_eof = 0;
     resp.m_header.m_toggle = 0;
-    schedule_get_resp_fragmentation_job(__oe_error_level_config_mcu_temperature_rx_fragmentation_buffer, 7, 21, msg.m_header.m_client_id);
+    schedule_get_resp_fragmentation_job(__oe_error_level_config_mcu_temperature_rx_fragmentation_buffer, 7, 18, msg.m_header.m_client_id);
     break;
   }
-  case 22: {
+  case 19: {
     resp.m_data |= min_u32((__oe_total_power - (0)) / 0.0006713969634546426, 0xFFFF) << 0;
     resp.m_header.m_sof = 1;
     resp.m_header.m_eof = 1;
@@ -931,7 +911,7 @@ static PROGMEM void canzero_handle_set_req(canzero_frame* frame) {
       return;
     }
     pdu_24v_state state_tmp;
-    state_tmp = ((pdu_24v_state)((msg.m_data >> 0) & (0xFFFFFFFF >> (32 - 1))));
+    state_tmp = ((pdu_24v_state)((msg.m_data >> 0) & (0xFFFFFFFF >> (32 - 2))));
     canzero_set_state(state_tmp);
     break;
   }
@@ -948,12 +928,21 @@ static PROGMEM void canzero_handle_set_req(canzero_frame* frame) {
     if (msg.m_header.m_sof != 1 || msg.m_header.m_toggle != 0 || msg.m_header.m_eof != 1) {
       return;
     }
+    pdu_24v_command command_tmp;
+    command_tmp = ((pdu_24v_command)((msg.m_data >> 0) & (0xFFFFFFFF >> (32 - 2))));
+    canzero_set_command(command_tmp);
+    break;
+  }
+  case 5 : {
+    if (msg.m_header.m_sof != 1 || msg.m_header.m_toggle != 0 || msg.m_header.m_eof != 1) {
+      return;
+    }
     error_flag assertion_fault_tmp;
     assertion_fault_tmp = ((error_flag)((msg.m_data >> 0) & (0xFFFFFFFF >> (32 - 1))));
     canzero_set_assertion_fault(assertion_fault_tmp);
     break;
   }
-  case 5 : {
+  case 6 : {
     if (msg.m_header.m_sof == 1) {
       if (msg.m_header.m_toggle != 0 || msg.m_header.m_eof != 0) {
         return; //TODO proper error response frame!
@@ -972,15 +961,6 @@ static PROGMEM void canzero_handle_set_req(canzero_frame* frame) {
     double loop_frequency_tmp;
     loop_frequency_tmp = ((uint64_t)loop_frequency_tmp_tx_fragmentation_buffer[0] | (((uint64_t)(loop_frequency_tmp_tx_fragmentation_buffer[1] & (0xFFFFFFFF >> (32 - 32)))) << 32)) * 0.00000000005421010862427522 + 0;
     canzero_set_loop_frequency(loop_frequency_tmp);
-    break;
-  }
-  case 6 : {
-    if (msg.m_header.m_sof != 1 || msg.m_header.m_toggle != 0 || msg.m_header.m_eof != 1) {
-      return;
-    }
-    pdu_channel_control cooling_pump_channel_ctrl_tmp;
-    cooling_pump_channel_ctrl_tmp = ((pdu_channel_control)((msg.m_data >> 0) & (0xFFFFFFFF >> (32 - 1))));
-    canzero_set_cooling_pump_channel_ctrl(cooling_pump_channel_ctrl_tmp);
     break;
   }
   case 7 : {
@@ -1005,21 +985,12 @@ static PROGMEM void canzero_handle_set_req(canzero_frame* frame) {
     if (msg.m_header.m_sof != 1 || msg.m_header.m_toggle != 0 || msg.m_header.m_eof != 1) {
       return;
     }
-    pdu_channel_control sdc_board_power_channel_ctrl_tmp;
-    sdc_board_power_channel_ctrl_tmp = ((pdu_channel_control)((msg.m_data >> 0) & (0xFFFFFFFF >> (32 - 1))));
-    canzero_set_sdc_board_power_channel_ctrl(sdc_board_power_channel_ctrl_tmp);
-    break;
-  }
-  case 10 : {
-    if (msg.m_header.m_sof != 1 || msg.m_header.m_toggle != 0 || msg.m_header.m_eof != 1) {
-      return;
-    }
     float sdc_board_power_channel_current_tmp;
     sdc_board_power_channel_current_tmp = (float)(((msg.m_data >> 0) & (0xFFFFFFFF >> (32 - 8))) * 0.0392156862745098 + 0);
     canzero_set_sdc_board_power_channel_current(sdc_board_power_channel_current_tmp);
     break;
   }
-  case 11 : {
+  case 10 : {
     if (msg.m_header.m_sof != 1 || msg.m_header.m_toggle != 0 || msg.m_header.m_eof != 1) {
       return;
     }
@@ -1028,16 +999,7 @@ static PROGMEM void canzero_handle_set_req(canzero_frame* frame) {
     canzero_set_sdc_board_power_channel_status(sdc_board_power_channel_status_tmp);
     break;
   }
-  case 12 : {
-    if (msg.m_header.m_sof != 1 || msg.m_header.m_toggle != 0 || msg.m_header.m_eof != 1) {
-      return;
-    }
-    pdu_channel_control sdc_signal_channel_ctrl_tmp;
-    sdc_signal_channel_ctrl_tmp = ((pdu_channel_control)((msg.m_data >> 0) & (0xFFFFFFFF >> (32 - 1))));
-    canzero_set_sdc_signal_channel_ctrl(sdc_signal_channel_ctrl_tmp);
-    break;
-  }
-  case 13 : {
+  case 11 : {
     if (msg.m_header.m_sof != 1 || msg.m_header.m_toggle != 0 || msg.m_header.m_eof != 1) {
       return;
     }
@@ -1046,7 +1008,7 @@ static PROGMEM void canzero_handle_set_req(canzero_frame* frame) {
     canzero_set_sdc_signal_channel_current(sdc_signal_channel_current_tmp);
     break;
   }
-  case 14 : {
+  case 12 : {
     if (msg.m_header.m_sof != 1 || msg.m_header.m_toggle != 0 || msg.m_header.m_eof != 1) {
       return;
     }
@@ -1055,16 +1017,7 @@ static PROGMEM void canzero_handle_set_req(canzero_frame* frame) {
     canzero_set_sdc_signal_channel_status(sdc_signal_channel_status_tmp);
     break;
   }
-  case 15 : {
-    if (msg.m_header.m_sof != 1 || msg.m_header.m_toggle != 0 || msg.m_header.m_eof != 1) {
-      return;
-    }
-    pdu_channel_control fan_channel_ctrl_tmp;
-    fan_channel_ctrl_tmp = ((pdu_channel_control)((msg.m_data >> 0) & (0xFFFFFFFF >> (32 - 1))));
-    canzero_set_fan_channel_ctrl(fan_channel_ctrl_tmp);
-    break;
-  }
-  case 16 : {
+  case 13 : {
     if (msg.m_header.m_sof != 1 || msg.m_header.m_toggle != 0 || msg.m_header.m_eof != 1) {
       return;
     }
@@ -1073,7 +1026,7 @@ static PROGMEM void canzero_handle_set_req(canzero_frame* frame) {
     canzero_set_fan_channel_current(fan_channel_current_tmp);
     break;
   }
-  case 17 : {
+  case 14 : {
     if (msg.m_header.m_sof != 1 || msg.m_header.m_toggle != 0 || msg.m_header.m_eof != 1) {
       return;
     }
@@ -1082,7 +1035,7 @@ static PROGMEM void canzero_handle_set_req(canzero_frame* frame) {
     canzero_set_fan_channel_status(fan_channel_status_tmp);
     break;
   }
-  case 18 : {
+  case 15 : {
     if (msg.m_header.m_sof != 1 || msg.m_header.m_toggle != 0 || msg.m_header.m_eof != 1) {
       return;
     }
@@ -1091,7 +1044,7 @@ static PROGMEM void canzero_handle_set_req(canzero_frame* frame) {
     canzero_set_error_any_short(error_any_short_tmp);
     break;
   }
-  case 19 : {
+  case 16 : {
     if (msg.m_header.m_sof != 1 || msg.m_header.m_toggle != 0 || msg.m_header.m_eof != 1) {
       return;
     }
@@ -1100,7 +1053,7 @@ static PROGMEM void canzero_handle_set_req(canzero_frame* frame) {
     canzero_set_mcu_temperature(mcu_temperature_tmp);
     break;
   }
-  case 20 : {
+  case 17 : {
     if (msg.m_header.m_sof != 1 || msg.m_header.m_toggle != 0 || msg.m_header.m_eof != 1) {
       return;
     }
@@ -1109,7 +1062,7 @@ static PROGMEM void canzero_handle_set_req(canzero_frame* frame) {
     canzero_set_error_level_mcu_temperature(error_level_mcu_temperature_tmp);
     break;
   }
-  case 21 : {
+  case 18 : {
     if (msg.m_header.m_sof == 1) {
       if (msg.m_header.m_toggle != 0 || msg.m_header.m_eof != 0) {
         return; //TODO proper error response frame!
@@ -1138,7 +1091,7 @@ static PROGMEM void canzero_handle_set_req(canzero_frame* frame) {
     canzero_set_error_level_config_mcu_temperature(error_level_config_mcu_temperature_tmp);
     break;
   }
-  case 22 : {
+  case 19 : {
     if (msg.m_header.m_sof != 1 || msg.m_header.m_toggle != 0 || msg.m_header.m_eof != 1) {
       return;
     }
@@ -1158,6 +1111,11 @@ static PROGMEM void canzero_handle_set_req(canzero_frame* frame) {
   canzero_serialize_canzero_message_set_resp(&resp, &resp_frame);
   canzero_can0_send(&resp_frame);
 
+}
+static void canzero_handle_mother_board_stream_pdu_24v_command(canzero_frame* frame) {
+  canzero_message_mother_board_stream_pdu_24v_command msg;
+  canzero_deserialize_canzero_message_mother_board_stream_pdu_24v_command(frame, &msg);
+  canzero_set_command(msg.m_power_board24_command);
 }
  void canzero_handle_heartbeat_can0(canzero_frame* frame) {
   canzero_message_heartbeat_can0 msg;
@@ -1225,6 +1183,9 @@ void canzero_can1_poll() {
       case 0xDE:
         canzero_handle_set_req(&frame);
         break;
+      case 0x40:
+        canzero_handle_mother_board_stream_pdu_24v_command(&frame);
+        break;
       case 0xE5:
         canzero_handle_heartbeat_can1(&frame);
         break;
@@ -1286,7 +1247,7 @@ uint32_t canzero_update_continue(uint32_t time){
 #define BUILD_MIN   ((BUILD_TIME_IS_BAD) ? 99 :  COMPUTE_BUILD_MIN)
 #define BUILD_SEC   ((BUILD_TIME_IS_BAD) ? 99 :  COMPUTE_BUILD_SEC)
 void canzero_init() {
-  __oe_config_hash = 13246184665973465734ull;
+  __oe_config_hash = 5883242605073433760ull;
   __oe_build_time = {
     .m_year = BUILD_YEAR,
     .m_month = BUILD_MONTH,
@@ -1448,7 +1409,7 @@ void canzero_send_build_time() {
 }
 void canzero_send_state() {
   canzero_message_get_resp msg;
-  msg.m_data |= ((uint32_t)(((uint8_t)__oe_state) & (0xFF >> (8 - 1)))) << 0;
+  msg.m_data |= ((uint32_t)(((uint8_t)__oe_state) & (0xFF >> (8 - 2)))) << 0;
   msg.m_header.m_eof = 1;
   msg.m_header.m_sof = 1;
   msg.m_header.m_toggle = 0;
@@ -1472,13 +1433,26 @@ void canzero_send_sdc_status() {
   canzero_serialize_canzero_message_get_resp(&msg, &sender_frame);
   canzero_can1_send(&sender_frame);
 }
+void canzero_send_command() {
+  canzero_message_get_resp msg;
+  msg.m_data |= ((uint32_t)(((uint8_t)__oe_command) & (0xFF >> (8 - 2)))) << 0;
+  msg.m_header.m_eof = 1;
+  msg.m_header.m_sof = 1;
+  msg.m_header.m_toggle = 0;
+  msg.m_header.m_od_index = 4;
+  msg.m_header.m_client_id = 255;
+  msg.m_header.m_server_id = node_id_power_board24;
+  canzero_frame sender_frame;
+  canzero_serialize_canzero_message_get_resp(&msg, &sender_frame);
+  canzero_can1_send(&sender_frame);
+}
 void canzero_send_assertion_fault() {
   canzero_message_get_resp msg;
   msg.m_data |= ((uint32_t)(((uint8_t)__oe_assertion_fault) & (0xFF >> (8 - 1)))) << 0;
   msg.m_header.m_eof = 1;
   msg.m_header.m_sof = 1;
   msg.m_header.m_toggle = 0;
-  msg.m_header.m_od_index = 4;
+  msg.m_header.m_od_index = 5;
   msg.m_header.m_client_id = 255;
   msg.m_header.m_server_id = node_id_power_board24;
   canzero_frame sender_frame;
@@ -1496,27 +1470,14 @@ void canzero_send_loop_frequency() {
   msg.m_header.m_eof = 0;
   msg.m_header.m_sof = 1;
   msg.m_header.m_toggle = 0;
-  msg.m_header.m_od_index = 5;
-  msg.m_header.m_client_id = 255;
-  msg.m_header.m_server_id = node_id_power_board24;
-  canzero_frame sender_frame;
-  canzero_serialize_canzero_message_get_resp(&msg, &sender_frame);
-  canzero_can1_send(&sender_frame);
-  schedule_get_resp_fragmentation_job(__oe_loop_frequency_send_fragmentation_buffer, 2, 5, 255);
-
-}
-void canzero_send_cooling_pump_channel_ctrl() {
-  canzero_message_get_resp msg;
-  msg.m_data |= ((uint32_t)(((uint8_t)__oe_cooling_pump_channel_ctrl) & (0xFF >> (8 - 1)))) << 0;
-  msg.m_header.m_eof = 1;
-  msg.m_header.m_sof = 1;
-  msg.m_header.m_toggle = 0;
   msg.m_header.m_od_index = 6;
   msg.m_header.m_client_id = 255;
   msg.m_header.m_server_id = node_id_power_board24;
   canzero_frame sender_frame;
   canzero_serialize_canzero_message_get_resp(&msg, &sender_frame);
   canzero_can1_send(&sender_frame);
+  schedule_get_resp_fragmentation_job(__oe_loop_frequency_send_fragmentation_buffer, 2, 6, 255);
+
 }
 void canzero_send_cooling_pump_channel_current() {
   canzero_message_get_resp msg;
@@ -1544,26 +1505,13 @@ void canzero_send_cooling_pump_channel_status() {
   canzero_serialize_canzero_message_get_resp(&msg, &sender_frame);
   canzero_can1_send(&sender_frame);
 }
-void canzero_send_sdc_board_power_channel_ctrl() {
-  canzero_message_get_resp msg;
-  msg.m_data |= ((uint32_t)(((uint8_t)__oe_sdc_board_power_channel_ctrl) & (0xFF >> (8 - 1)))) << 0;
-  msg.m_header.m_eof = 1;
-  msg.m_header.m_sof = 1;
-  msg.m_header.m_toggle = 0;
-  msg.m_header.m_od_index = 9;
-  msg.m_header.m_client_id = 255;
-  msg.m_header.m_server_id = node_id_power_board24;
-  canzero_frame sender_frame;
-  canzero_serialize_canzero_message_get_resp(&msg, &sender_frame);
-  canzero_can1_send(&sender_frame);
-}
 void canzero_send_sdc_board_power_channel_current() {
   canzero_message_get_resp msg;
   msg.m_data |= min_u32((__oe_sdc_board_power_channel_current - (0)) / 0.0392156862745098, 0xFF) << 0;
   msg.m_header.m_eof = 1;
   msg.m_header.m_sof = 1;
   msg.m_header.m_toggle = 0;
-  msg.m_header.m_od_index = 10;
+  msg.m_header.m_od_index = 9;
   msg.m_header.m_client_id = 255;
   msg.m_header.m_server_id = node_id_power_board24;
   canzero_frame sender_frame;
@@ -1576,20 +1524,7 @@ void canzero_send_sdc_board_power_channel_status() {
   msg.m_header.m_eof = 1;
   msg.m_header.m_sof = 1;
   msg.m_header.m_toggle = 0;
-  msg.m_header.m_od_index = 11;
-  msg.m_header.m_client_id = 255;
-  msg.m_header.m_server_id = node_id_power_board24;
-  canzero_frame sender_frame;
-  canzero_serialize_canzero_message_get_resp(&msg, &sender_frame);
-  canzero_can1_send(&sender_frame);
-}
-void canzero_send_sdc_signal_channel_ctrl() {
-  canzero_message_get_resp msg;
-  msg.m_data |= ((uint32_t)(((uint8_t)__oe_sdc_signal_channel_ctrl) & (0xFF >> (8 - 1)))) << 0;
-  msg.m_header.m_eof = 1;
-  msg.m_header.m_sof = 1;
-  msg.m_header.m_toggle = 0;
-  msg.m_header.m_od_index = 12;
+  msg.m_header.m_od_index = 10;
   msg.m_header.m_client_id = 255;
   msg.m_header.m_server_id = node_id_power_board24;
   canzero_frame sender_frame;
@@ -1602,7 +1537,7 @@ void canzero_send_sdc_signal_channel_current() {
   msg.m_header.m_eof = 1;
   msg.m_header.m_sof = 1;
   msg.m_header.m_toggle = 0;
-  msg.m_header.m_od_index = 13;
+  msg.m_header.m_od_index = 11;
   msg.m_header.m_client_id = 255;
   msg.m_header.m_server_id = node_id_power_board24;
   canzero_frame sender_frame;
@@ -1615,20 +1550,7 @@ void canzero_send_sdc_signal_channel_status() {
   msg.m_header.m_eof = 1;
   msg.m_header.m_sof = 1;
   msg.m_header.m_toggle = 0;
-  msg.m_header.m_od_index = 14;
-  msg.m_header.m_client_id = 255;
-  msg.m_header.m_server_id = node_id_power_board24;
-  canzero_frame sender_frame;
-  canzero_serialize_canzero_message_get_resp(&msg, &sender_frame);
-  canzero_can1_send(&sender_frame);
-}
-void canzero_send_fan_channel_ctrl() {
-  canzero_message_get_resp msg;
-  msg.m_data |= ((uint32_t)(((uint8_t)__oe_fan_channel_ctrl) & (0xFF >> (8 - 1)))) << 0;
-  msg.m_header.m_eof = 1;
-  msg.m_header.m_sof = 1;
-  msg.m_header.m_toggle = 0;
-  msg.m_header.m_od_index = 15;
+  msg.m_header.m_od_index = 12;
   msg.m_header.m_client_id = 255;
   msg.m_header.m_server_id = node_id_power_board24;
   canzero_frame sender_frame;
@@ -1641,7 +1563,7 @@ void canzero_send_fan_channel_current() {
   msg.m_header.m_eof = 1;
   msg.m_header.m_sof = 1;
   msg.m_header.m_toggle = 0;
-  msg.m_header.m_od_index = 16;
+  msg.m_header.m_od_index = 13;
   msg.m_header.m_client_id = 255;
   msg.m_header.m_server_id = node_id_power_board24;
   canzero_frame sender_frame;
@@ -1654,7 +1576,7 @@ void canzero_send_fan_channel_status() {
   msg.m_header.m_eof = 1;
   msg.m_header.m_sof = 1;
   msg.m_header.m_toggle = 0;
-  msg.m_header.m_od_index = 17;
+  msg.m_header.m_od_index = 14;
   msg.m_header.m_client_id = 255;
   msg.m_header.m_server_id = node_id_power_board24;
   canzero_frame sender_frame;
@@ -1667,7 +1589,7 @@ void canzero_send_error_any_short() {
   msg.m_header.m_eof = 1;
   msg.m_header.m_sof = 1;
   msg.m_header.m_toggle = 0;
-  msg.m_header.m_od_index = 18;
+  msg.m_header.m_od_index = 15;
   msg.m_header.m_client_id = 255;
   msg.m_header.m_server_id = node_id_power_board24;
   canzero_frame sender_frame;
@@ -1680,7 +1602,7 @@ void canzero_send_mcu_temperature() {
   msg.m_header.m_eof = 1;
   msg.m_header.m_sof = 1;
   msg.m_header.m_toggle = 0;
-  msg.m_header.m_od_index = 19;
+  msg.m_header.m_od_index = 16;
   msg.m_header.m_client_id = 255;
   msg.m_header.m_server_id = node_id_power_board24;
   canzero_frame sender_frame;
@@ -1693,7 +1615,7 @@ void canzero_send_error_level_mcu_temperature() {
   msg.m_header.m_eof = 1;
   msg.m_header.m_sof = 1;
   msg.m_header.m_toggle = 0;
-  msg.m_header.m_od_index = 20;
+  msg.m_header.m_od_index = 17;
   msg.m_header.m_client_id = 255;
   msg.m_header.m_server_id = node_id_power_board24;
   canzero_frame sender_frame;
@@ -1716,13 +1638,13 @@ void canzero_send_error_level_config_mcu_temperature() {
   msg.m_header.m_eof = 0;
   msg.m_header.m_sof = 1;
   msg.m_header.m_toggle = 0;
-  msg.m_header.m_od_index = 21;
+  msg.m_header.m_od_index = 18;
   msg.m_header.m_client_id = 255;
   msg.m_header.m_server_id = node_id_power_board24;
   canzero_frame sender_frame;
   canzero_serialize_canzero_message_get_resp(&msg, &sender_frame);
   canzero_can1_send(&sender_frame);
-  schedule_get_resp_fragmentation_job(__oe_error_level_config_mcu_temperature_send_fragmentation_buffer, 7, 21, 255);
+  schedule_get_resp_fragmentation_job(__oe_error_level_config_mcu_temperature_send_fragmentation_buffer, 7, 18, 255);
 
 }
 void canzero_send_total_power() {
@@ -1731,7 +1653,7 @@ void canzero_send_total_power() {
   msg.m_header.m_eof = 1;
   msg.m_header.m_sof = 1;
   msg.m_header.m_toggle = 0;
-  msg.m_header.m_od_index = 22;
+  msg.m_header.m_od_index = 19;
   msg.m_header.m_client_id = 255;
   msg.m_header.m_server_id = node_id_power_board24;
   canzero_frame sender_frame;

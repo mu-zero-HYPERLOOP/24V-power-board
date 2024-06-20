@@ -38,11 +38,35 @@ pdu24_status_to_canzero_status(pdu24_channel_status status) {
   }
 }
 
-void channel_control() {
+pdu_24v_state channel_control() {
+  pdu_24v_command command = canzero_get_command();
+  pdu_24v_state next_state = canzero_get_state();
+  switch (command) {
+    case pdu_24v_command_NONE:
+      break;
+    case pdu_24v_command_START:
+      pdu24::control(COOLING_PUMP_CHANNEL, true);
+      pdu24::control(SDC_POWER_CHANNEL, true);
+      pdu24::control(SDC_SIGNAL_CHANNEL, true);
+      pdu24::control(FAN_CHANNEL, true);
+      next_state = pdu_24v_state_CHANNELS_ON;
+      break;
+    case pdu_24v_command_STOP:
+      pdu24::control(COOLING_PUMP_CHANNEL, false);
+      pdu24::control(SDC_POWER_CHANNEL, false);
+      pdu24::control(SDC_SIGNAL_CHANNEL, false);
+      pdu24::control(FAN_CHANNEL, false);
+      next_state = pdu_24v_state_CHANNELS_OFF;
+      break;
+    case pdu_24v_command_IDLE:
+      pdu24::control(COOLING_PUMP_CHANNEL, false);
+      pdu24::control(SDC_POWER_CHANNEL, false);
+      pdu24::control(SDC_SIGNAL_CHANNEL, false);
+      pdu24::control(FAN_CHANNEL, true);
+      next_state = pdu_24v_state_CHANNELS_IDLE;
+      break;
+  }
   // ========= COOLING PUMP =========
-  pdu24::control(COOLING_PUMP_CHANNEL,
-                 canzero_get_cooling_pump_channel_ctrl() ==
-                     pdu_channel_control_ON);
   if (cooling_pump_sense_interval.next()) {
     cooling_pump_current_filter.push(pdu24::sense(COOLING_PUMP_CHANNEL));
     canzero_set_cooling_pump_channel_current(
@@ -52,8 +76,6 @@ void channel_control() {
       pdu24_status_to_canzero_status(pdu24::status(COOLING_PUMP_CHANNEL)));
 
   // ========== SDC BOARD POWER ==========
-  pdu24::control(SDC_POWER_CHANNEL, canzero_get_sdc_board_power_channel_ctrl() ==
-                                        pdu_channel_control_ON);
   if (sdc_power_sense_interval.next()) {
     sdc_power_current_filter.push(pdu24::sense(SDC_POWER_CHANNEL));
     canzero_set_sdc_board_power_channel_current(
@@ -63,8 +85,6 @@ void channel_control() {
       pdu24_status_to_canzero_status(pdu24::status(SDC_POWER_CHANNEL)));
 
   // ========== SDC SIGNAL ==========
-  pdu24::control(SDC_SIGNAL_CHANNEL, canzero_get_sdc_signal_channel_ctrl() ==
-                                         pdu_channel_control_ON);
   if (sdc_signal_sense_interval.next()) {
     sdc_signal_current_filter.push(pdu24::sense(SDC_SIGNAL_CHANNEL));
     canzero_set_sdc_signal_channel_current(
@@ -74,8 +94,6 @@ void channel_control() {
       pdu24_status_to_canzero_status(pdu24::status(SDC_SIGNAL_CHANNEL)));
 
   // =========== FAN CHANNELS ========
-  pdu24::control(FAN_CHANNEL,
-                 canzero_get_fan_channel_ctrl() == pdu_channel_control_ON);
   if (fan_sense_interval.next()) {
     fan_current_filter.push(pdu24::sense(FAN_CHANNEL));
     canzero_set_fan_channel_current(
@@ -89,5 +107,6 @@ void channel_control() {
     total_power_filter.push(pdu24::total_power_output());
     canzero_set_total_power(static_cast<float>(total_power_filter.get()));
   }
+  return next_state;
 }
 
