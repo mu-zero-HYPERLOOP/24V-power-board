@@ -38,10 +38,9 @@ pdu24_status_to_canzero_status(pdu24_channel_status status) {
   }
 }
 
-pdu_24v_state channel_control() {
-  pdu_24v_command command = canzero_get_command();
+pdu_24v_state channel_control(pdu_24v_command cmd) {
   pdu_24v_state next_state = canzero_get_state();
-  switch (command) {
+  switch (cmd) {
     case pdu_24v_command_NONE:
       break;
     case pdu_24v_command_START:

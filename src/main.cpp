@@ -12,6 +12,7 @@
 #include "util/boxcar.h"
 #include "util/interval.h"
 #include "util/timing.h"
+#include "error_handling.hpp"
 #include <cstdio>
 
 static IntervalTiming main_loop_interval_timer;
@@ -34,7 +35,6 @@ int main() {
   canzero_set_state(pdu_24v_state_CHANNELS_OFF);
   pdu_24v_state next_state = pdu_24v_state_CHANNELS_OFF;
   canzero_set_command(pdu_24v_command_STOP);
-  printf("%d\n", canzero_get_state());
   while (true) {
 
     canzero_can0_poll();
@@ -42,8 +42,8 @@ int main() {
 
     pdu24::update();
     canzero_set_state(next_state);
-    next_state = channel_control();
-    printf("%d\n", canzero_get_state());
+    pdu_24v_command cmd = error_handling::approve(canzero_get_command());
+    next_state = channel_control(cmd);
 
     // =========== SDC CTRL =========
     bool any_short = pdu24::any_short();
