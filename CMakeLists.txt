@@ -14,9 +14,10 @@ add_executable(${PROJECT_NAME}
   src/main.cpp
   mock/can.cpp
   mock/pdu.cpp
+  mock/print.cpp
   src/channel_control.cpp
   src/canzero/canzero.cpp
-  mock/handle_heartbeat.cpp
+  src/handle_heartbeat.cpp
   src/error_handling.cpp
 )
 

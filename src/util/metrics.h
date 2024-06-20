@@ -727,8 +727,6 @@ constexpr Weight operator""_kg(const unsigned long long v) {
 constexpr Weight operator""_g(const long double v) { return Weight(v / 1e3); }
 constexpr Weight operator""_g(const unsigned long long v) {
   return Weight(static_cast<float>(v / 1e3));
-
-  /* std::cout << "b = " << b << std::endl; */
 }
 constexpr Weight operator""_mg(const long double v) { return Weight(v / 1e6); }
 constexpr Weight operator""_mg(const unsigned long long v) {
