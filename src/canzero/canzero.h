@@ -2,6 +2,7 @@
 #define CANZERO_H
 #include <cinttypes>
 #include <cstddef>
+#define MAX_DYN_HEARTBEATS 10
 typedef enum {
   node_id_gamepad = 0,
   node_id_mother_board = 1,
@@ -101,6 +102,7 @@ typedef struct {
   bool_t m_ignore_warning;
   bool_t m_ignore_error;
 } error_level_config;
+static const node_id CANZERO_NODE_ID = node_id_power_board24;
 typedef struct {
   uint32_t id;
   uint8_t dlc;
@@ -212,70 +214,70 @@ typedef struct {
   get_resp_header m_header;
   uint32_t m_data;
 } canzero_message_get_resp;
-static const uint32_t canzero_message_get_resp_id = 0xBD;
+static const uint32_t canzero_message_get_resp_id = 0x17D;
 typedef struct {
   set_resp_header m_header;
 } canzero_message_set_resp;
-static const uint32_t canzero_message_set_resp_id = 0xDD;
+static const uint32_t canzero_message_set_resp_id = 0x1BD;
 typedef struct {
   pdu_24v_state m_state;
   sdc_status m_sdc_status;
 } canzero_message_power_board24_stream_state;
-static const uint32_t canzero_message_power_board24_stream_state_id = 0x47;
+static const uint32_t canzero_message_power_board24_stream_state_id = 0xA6;
 typedef struct {
   float m_mcu_temperature;
 } canzero_message_power_board24_stream_temperature;
-static const uint32_t canzero_message_power_board24_stream_temperature_id = 0x6B;
+static const uint32_t canzero_message_power_board24_stream_temperature_id = 0x12A;
 typedef struct {
   error_flag m_assertion_fault;
   error_flag m_error_any_short;
   error_flag m_error_heartbeat_miss;
   error_level m_error_level_mcu_temperature;
 } canzero_message_power_board24_stream_errors;
-static const uint32_t canzero_message_power_board24_stream_errors_id = 0x8C;
+static const uint32_t canzero_message_power_board24_stream_errors_id = 0xAA;
 typedef struct {
   pdu_channel_status m_cooling_pump_channel_status;
   pdu_channel_status m_sdc_board_power_channel_status;
   pdu_channel_status m_sdc_signal_channel_status;
   pdu_channel_status m_fan_channel_status;
 } canzero_message_power_board24_stream_channel_status;
-static const uint32_t canzero_message_power_board24_stream_channel_status_id = 0x6C;
+static const uint32_t canzero_message_power_board24_stream_channel_status_id = 0x12B;
 typedef struct {
   float m_cooling_pump_channel_current;
   float m_sdc_board_power_channel_current;
   float m_sdc_signal_channel_current;
   float m_fan_channel_current;
 } canzero_message_power_board24_stream_channel_currents;
-static const uint32_t canzero_message_power_board24_stream_channel_currents_id = 0x4C;
+static const uint32_t canzero_message_power_board24_stream_channel_currents_id = 0xEB;
 typedef struct {
   float m_total_power;
 } canzero_message_power_board24_stream_power_consumption;
-static const uint32_t canzero_message_power_board24_stream_power_consumption_id = 0x4B;
+static const uint32_t canzero_message_power_board24_stream_power_consumption_id = 0xEA;
 typedef struct {
   uint8_t m_node_id;
   uint8_t m_unregister;
   uint8_t m_ticks_next;
 } canzero_message_heartbeat_can0;
-static const uint32_t canzero_message_heartbeat_can0_id = 0xE6;
+static const uint32_t canzero_message_heartbeat_can0_id = 0x1E5;
 typedef struct {
   uint8_t m_node_id;
   uint8_t m_unregister;
   uint8_t m_ticks_next;
 } canzero_message_heartbeat_can1;
-static const uint32_t canzero_message_heartbeat_can1_id = 0xE5;
+static const uint32_t canzero_message_heartbeat_can1_id = 0x1E4;
 typedef struct {
   get_req_header m_header;
 } canzero_message_get_req;
-static const uint32_t canzero_message_get_req_id = 0xBE;
+static const uint32_t canzero_message_get_req_id = 0x17E;
 typedef struct {
   set_req_header m_header;
   uint32_t m_data;
 } canzero_message_set_req;
-static const uint32_t canzero_message_set_req_id = 0xDE;
+static const uint32_t canzero_message_set_req_id = 0x1BE;
 typedef struct {
   pdu_24v_command m_power_board24_command;
 } canzero_message_mother_board_stream_pdu_24v_command;
-static const uint32_t canzero_message_mother_board_stream_pdu_24v_command_id = 0x40;
+static const uint32_t canzero_message_mother_board_stream_pdu_24v_command_id = 0x9F;
 void canzero_can0_poll();
 void canzero_can1_poll();
 uint32_t canzero_update_continue(uint32_t delta_time);
