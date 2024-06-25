@@ -1,5 +1,6 @@
 #include "pdu24.hpp"
 #include "core_pins.h"
+#include "canzero/canzero.h"
 #include <Arduino.h>
 #include <InternalTemperature.h>
 #include <algorithm>
@@ -177,7 +178,10 @@ void pdu24::control(pdu24_channel channel, bool active) {
   m_ctrl[channel] = active;
 }
 
-void pdu24::set_sdc(bool closed) { digitalWrite(SDC_CTRL_PIN, closed); }
+void pdu24::set_sdc(bool closed) { 
+  digitalWrite(SDC_CTRL_PIN, closed);
+  canzero_set_sdc_status(closed ? sdc_status_CLOSED : sdc_status_OPEN);
+}
 
 Temperature pdu24::read_mcu_temperature() {
   float temp = InternalTemperature.readTemperatureC();
