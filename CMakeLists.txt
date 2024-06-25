@@ -18,7 +18,8 @@ add_executable(${PROJECT_NAME}
   src/channel_control.cpp
   src/canzero/canzero.cpp
   src/handle_heartbeat.cpp
-  src/error_handling.cpp
+  src/fsm/error_handling.cpp
+  src/fsm/fsm.cpp
   src/handle_heartbeat.cpp
 )
 

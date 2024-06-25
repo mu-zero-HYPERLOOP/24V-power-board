@@ -12,7 +12,7 @@
 #include "util/boxcar.h"
 #include "util/interval.h"
 #include "util/timing.h"
-#include "error_handling.hpp"
+#include "fsm/fsm.hpp"
 #include <cstdio>
 
 static IntervalTiming main_loop_interval_timer;
@@ -31,25 +31,17 @@ int main() {
   canzero_update_continue(canzero_get_time());
 
   pdu24::begin();
+  fsm::begin();
 
-  canzero_set_state(pdu_24v_state_CHANNELS_OFF);
-  pdu_24v_state next_state = pdu_24v_state_CHANNELS_OFF;
-  canzero_set_command(pdu_24v_command_STOP);
   while (true) {
 
     canzero_can0_poll();
     canzero_can1_poll();
 
     pdu24::update();
-    canzero_set_state(next_state);
-    pdu_24v_command cmd = error_handling::approve(canzero_get_command());
-    next_state = channel_control(cmd);
-
-    // =========== SDC CTRL =========
-    bool any_short = pdu24::any_short();
-    pdu24::set_sdc(!any_short);
-    canzero_set_error_any_short(any_short ? error_flag_ERROR : error_flag_OK);
-    canzero_set_sdc_status(any_short ? sdc_status_OPEN : sdc_status_CLOSED);
+    canzero_set_error_any_short(pdu24::any_short() ? error_flag_ERROR : error_flag_OK);
+    fsm::update();
+    channel_control(canzero_get_state());
 
     // =========== Temperature ======
     if (mcu_temperature_interval.next()) {

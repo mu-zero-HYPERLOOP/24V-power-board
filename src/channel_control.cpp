@@ -38,31 +38,27 @@ pdu24_status_to_canzero_status(pdu24_channel_status status) {
   }
 }
 
-pdu_24v_state channel_control(pdu_24v_command cmd) {
-  pdu_24v_state next_state = canzero_get_state();
-  switch (cmd) {
-    case pdu_24v_command_NONE:
-      break;
-    case pdu_24v_command_START:
+void channel_control(pdu_24v_state state) {
+  switch (state) {
+    case pdu_24v_state_CHANNELS_ON:
       pdu24::control(COOLING_PUMP_CHANNEL, true);
       pdu24::control(SDC_POWER_CHANNEL, true);
       pdu24::control(SDC_SIGNAL_CHANNEL, true);
       pdu24::control(FAN_CHANNEL, true);
-      next_state = pdu_24v_state_CHANNELS_ON;
       break;
-    case pdu_24v_command_STOP:
+    case pdu_24v_state_CHANNELS_OFF:
       pdu24::control(COOLING_PUMP_CHANNEL, false);
       pdu24::control(SDC_POWER_CHANNEL, false);
       pdu24::control(SDC_SIGNAL_CHANNEL, false);
       pdu24::control(FAN_CHANNEL, false);
-      next_state = pdu_24v_state_CHANNELS_OFF;
       break;
-    case pdu_24v_command_IDLE:
+    case pdu_24v_state_CHANNELS_IDLE:
       pdu24::control(COOLING_PUMP_CHANNEL, false);
       pdu24::control(SDC_POWER_CHANNEL, false);
       pdu24::control(SDC_SIGNAL_CHANNEL, false);
       pdu24::control(FAN_CHANNEL, true);
-      next_state = pdu_24v_state_CHANNELS_IDLE;
+      break;
+    case pdu_24v_state_INIT:
       break;
   }
   // ========= COOLING PUMP =========
@@ -106,6 +102,5 @@ pdu_24v_state channel_control(pdu_24v_command cmd) {
     total_power_filter.push(pdu24::total_power_output());
     canzero_set_total_power(static_cast<float>(total_power_filter.get()));
   }
-  return next_state;
 }
 
