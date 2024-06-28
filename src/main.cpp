@@ -5,6 +5,7 @@
  */
 
 #include "canzero/canzero.h"
+#include "sdc.h"
 #include "channel_control.h"
 #include "defaults.h"
 #include "error_level_range_check.h"
@@ -29,8 +30,9 @@ int main() {
 
   can_defaults();
   canzero_update_continue(canzero_get_time());
-
+  
   pdu24::begin();
+  sdc::begin();
   fsm::begin();
 
   while (true) {

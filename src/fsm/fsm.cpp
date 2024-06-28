@@ -2,6 +2,7 @@
 #include "canzero/canzero.h"
 #include "fsm/error_handling.hpp"
 #include "firmware/pdu24.hpp"
+#include "sdc.h"
 
 void fsm::begin() {
   canzero_set_state(pdu_24v_state_CHANNELS_OFF);
@@ -18,23 +19,23 @@ void fsm::update() {
     canzero_set_state(pdu_24v_state_CHANNELS_ON);
     if (canzero_get_error_any_short() == error_flag_OK &&
         canzero_get_error_heartbeat_miss() == error_flag_OK) {
-      pdu24::set_sdc(false);
+      sdc::close();
     } else {
-      pdu24::set_sdc(true);
+      sdc::open();
     }
     break;
   case pdu_24v_command_IDLE:
     canzero_set_state(pdu_24v_state_CHANNELS_IDLE);
     if (canzero_get_error_any_short() == error_flag_OK &&
         canzero_get_error_heartbeat_miss() == error_flag_OK) {
-      pdu24::set_sdc(false);
+      sdc::close();
     } else {
-      pdu24::set_sdc(true);
+      sdc::open();
     }
     break;
   case pdu_24v_command_STOP:
     canzero_set_state(pdu_24v_state_CHANNELS_OFF);
-    pdu24::set_sdc(false);
+    sdc::close();
     break;
   }
 }
