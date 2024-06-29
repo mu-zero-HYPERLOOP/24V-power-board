@@ -4,6 +4,8 @@
 #include <imxrt.h>
 #include <inttypes.h>
 
+#include <avr/pgmspace.h>
+
 enum class CanInterface { CAN1, CAN2, CAN3 };
 
 enum CanBaudrate : uint32_t {
@@ -72,7 +74,7 @@ private:
   };
 
 public:
-  static void begin(const CanBeginInfo &begin_info) {
+  static void FLASHMEM begin(const CanBeginInfo &begin_info) {
     m_flexcan.begin();
     m_flexcan.setMaxMB(64);
     m_flexcan.setBaudRate(static_cast<uint32_t>(begin_info.baudrate));
@@ -94,7 +96,7 @@ public:
     m_flexcan.mailboxStatus();
   }
 
-  static void enqueue(const CAN_message_t &msg) { m_fifo.enqueue(msg); }
+  static void FASTRUN enqueue(const CAN_message_t &msg) { m_fifo.enqueue(msg); }
 
   /**
    * Receives a message from the CAN and writes it to @param msg.
@@ -102,7 +104,7 @@ public:
    * message was received) returns false. NOTE: This function should not be
    * called from a ISR!
    */
-  static int recv(CAN_message_t &msg) { return m_fifo.dequeue(msg); }
+  static int FASTRUN recv(CAN_message_t &msg) { return m_fifo.dequeue(msg); }
 
   /**
    * Sends @param msg on the CAN.
@@ -110,7 +112,7 @@ public:
    * NOTE: Sending is not buffered sending a lot might overflow the TX_QUEUE,
    * which leads to dropped messages!
    */
-  static int send(const CAN_message_t &msg) { return m_flexcan.write(msg); }
+  static int FASTRUN send(const CAN_message_t &msg) { return m_flexcan.write(msg); }
 
 private:
   static constexpr CAN_DEV_TABLE FlexCanModule() {
@@ -130,10 +132,10 @@ private:
 };
 
 template <CanInterface INTERFACE>
-typename CAN<INTERFACE>::FlexCAN CAN<INTERFACE>::m_flexcan;
+DMAMEM typename CAN<INTERFACE>::FlexCAN CAN<INTERFACE>::m_flexcan;
 
 template <CanInterface INTERFACE> 
-typename CAN<INTERFACE>::RxSoftwareFifo CAN<INTERFACE>::m_fifo;
+DMAMEM typename CAN<INTERFACE>::RxSoftwareFifo CAN<INTERFACE>::m_fifo;
 
 
  typedef CAN<CanInterface::CAN1> Can1;
