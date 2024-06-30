@@ -4,7 +4,6 @@
  * @created     : Sonntag Apr 14, 2024 18:24:07 CEST
  */
 
-#include "core_pins.h"
 #include "print.h"
 #include "canzero/canzero.h"
 #include "sdc.h"

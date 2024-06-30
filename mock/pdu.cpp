@@ -1,4 +1,3 @@
-#include "core_pins.h"
 #include "firmware/pdu24.hpp"
 #include <algorithm>
 #include <random>
@@ -22,7 +21,6 @@ void pdu24::begin() {
     m_currents[i] = 0_A;
     m_ctrl[i] = false;
   }
-  pinMode(SDC_CTRL_PIN, OUTPUT);
 }
 
 void pdu24::update() {

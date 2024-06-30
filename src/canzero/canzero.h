@@ -34,12 +34,9 @@ typedef struct {
 typedef enum {
   pdu_24v_command_NONE = 0,
   pdu_24v_command_START = 1,
-  pdu_24v_command_STOP = 2,
+  pdu_24v_command_IDLE = 2,
+  pdu_24v_command_STOP = 3,
 } pdu_24v_command;
-typedef enum {
-  bool_t_FALSE = 0,
-  bool_t_TRUE = 1,
-} bool_t;
 typedef struct {
   uint8_t m_sof;
   uint8_t m_eof;
@@ -61,7 +58,8 @@ typedef struct {
 typedef enum {
   pdu_24v_state_INIT = 0,
   pdu_24v_state_CHANNELS_OFF = 1,
-  pdu_24v_state_CHANNELS_ON = 2,
+  pdu_24v_state_CHANNELS_IDLE = 2,
+  pdu_24v_state_CHANNELS_ON = 3,
 } pdu_24v_state;
 typedef enum {
   sdc_status_OPEN = 0,
@@ -91,10 +89,9 @@ typedef struct {
   uint8_t m_sec;
 } date_time;
 typedef enum {
-  tristate_t_FALSE = 1,
-  tristate_t_TRUE = 2,
-  tristate_t_DONT_CARE = 3,
-} tristate_t;
+  bool_t_FALSE = 0,
+  bool_t_TRUE = 1,
+} bool_t;
 typedef struct {
   float m_info_thresh;
   float m_info_timeout;
@@ -177,14 +174,6 @@ static inline float canzero_get_cooling_pump_channel_current() {
 static inline pdu_channel_status canzero_get_cooling_pump_channel_status() {
   extern pdu_channel_status __oe_cooling_pump_channel_status;
   return __oe_cooling_pump_channel_status;
-}
-static inline bool_t canzero_get_cooling_pump_channel_ctrl() {
-  extern bool_t __oe_cooling_pump_channel_ctrl;
-  return __oe_cooling_pump_channel_ctrl;
-}
-static inline tristate_t canzero_get_overwrite_cooling() {
-  extern tristate_t __oe_overwrite_cooling;
-  return __oe_overwrite_cooling;
 }
 static inline float canzero_get_sdc_board_power_channel_current() {
   extern float __oe_sdc_board_power_channel_current;
@@ -288,7 +277,6 @@ typedef struct {
 static const uint32_t canzero_message_set_req_id = 0x11E;
 typedef struct {
   pdu_24v_command m_power_board24_command;
-  bool_t m_power_board24_cooling_pump_channel_ctrl;
 } canzero_message_mother_board_stream_pdu_24v_command;
 static const uint32_t canzero_message_mother_board_stream_pdu_24v_command_id = 0x44;
 void canzero_can0_poll();
@@ -333,16 +321,6 @@ static inline void canzero_set_cooling_pump_channel_current(float value){
 }
 
 void canzero_set_cooling_pump_channel_status(pdu_channel_status value);
-
-static inline void canzero_set_cooling_pump_channel_ctrl(bool_t value){
-  extern bool_t __oe_cooling_pump_channel_ctrl;
-  __oe_cooling_pump_channel_ctrl = value;
-}
-
-static inline void canzero_set_overwrite_cooling(tristate_t value){
-  extern tristate_t __oe_overwrite_cooling;
-  __oe_overwrite_cooling = value;
-}
 
 static inline void canzero_set_sdc_board_power_channel_current(float value){
   extern float __oe_sdc_board_power_channel_current;
@@ -403,10 +381,6 @@ void canzero_send_loop_frequency();
 void canzero_send_cooling_pump_channel_current();
 
 void canzero_send_cooling_pump_channel_status();
-
-void canzero_send_cooling_pump_channel_ctrl();
-
-void canzero_send_overwrite_cooling();
 
 void canzero_send_sdc_board_power_channel_current();
 
