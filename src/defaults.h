@@ -4,12 +4,15 @@
 static void can_defaults() {
   canzero_set_state(pdu_24v_state_INIT);
   canzero_set_sdc_status(sdc_status_OPEN);
+
   canzero_set_assertion_fault(error_flag_OK);
   canzero_set_error_any_short(error_flag_OK);
   canzero_set_error_heartbeat_miss(error_flag_OK);
 
   canzero_set_cooling_pump_channel_status(pdu_channel_status_OFF);
   canzero_set_cooling_pump_channel_current(0);
+  canzero_set_cooling_pump_channel_ctrl(bool_t_FALSE);
+  canzero_set_overwrite_cooling(tristate_t_DONT_CARE);
 
   canzero_set_sdc_board_power_channel_status(pdu_channel_status_OFF);
   canzero_set_sdc_board_power_channel_current(0);

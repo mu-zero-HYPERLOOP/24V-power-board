@@ -17,25 +17,11 @@ void fsm::update() {
     break;
   case pdu_24v_command_START:
     canzero_set_state(pdu_24v_state_CHANNELS_ON);
-    if (canzero_get_error_any_short() == error_flag_OK &&
-        canzero_get_error_heartbeat_miss() == error_flag_OK) {
-      sdc::close();
-    } else {
-      sdc::open();
-    }
-    break;
-  case pdu_24v_command_IDLE:
-    canzero_set_state(pdu_24v_state_CHANNELS_IDLE);
-    if (canzero_get_error_any_short() == error_flag_OK &&
-        canzero_get_error_heartbeat_miss() == error_flag_OK) {
-      sdc::close();
-    } else {
-      sdc::open();
-    }
+    sdc::close();
     break;
   case pdu_24v_command_STOP:
     canzero_set_state(pdu_24v_state_CHANNELS_OFF);
-    sdc::close();
+    sdc::open();
     break;
   }
 }

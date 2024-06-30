@@ -41,22 +41,22 @@ pdu24_status_to_canzero_status(pdu24_channel_status status) {
 void channel_control(pdu_24v_state state) {
   switch (state) {
     case pdu_24v_state_CHANNELS_ON:
-      pdu24::control(COOLING_PUMP_CHANNEL, true);
+      if (canzero_get_overwrite_cooling() == tristate_t_DONT_CARE) {
+        pdu24::control(COOLING_PUMP_CHANNEL, 
+            canzero_get_cooling_pump_channel_ctrl() == bool_t_TRUE);
+      } else {
+        pdu24::control(COOLING_PUMP_CHANNEL, 
+            canzero_get_overwrite_cooling() == tristate_t_TRUE);
+      }
       pdu24::control(SDC_POWER_CHANNEL, true);
       pdu24::control(SDC_SIGNAL_CHANNEL, true);
       pdu24::control(FAN_CHANNEL, true);
       break;
     case pdu_24v_state_CHANNELS_OFF:
-      pdu24::control(COOLING_PUMP_CHANNEL, false);
+      pdu24::control(COOLING_PUMP_CHANNEL, canzero_get_overwrite_cooling() == tristate_t_TRUE);
       pdu24::control(SDC_POWER_CHANNEL, false);
       pdu24::control(SDC_SIGNAL_CHANNEL, false);
       pdu24::control(FAN_CHANNEL, false);
-      break;
-    case pdu_24v_state_CHANNELS_IDLE:
-      pdu24::control(COOLING_PUMP_CHANNEL, false);
-      pdu24::control(SDC_POWER_CHANNEL, false);
-      pdu24::control(SDC_SIGNAL_CHANNEL, false);
-      pdu24::control(FAN_CHANNEL, true);
       break;
     case pdu_24v_state_INIT:
       break;
