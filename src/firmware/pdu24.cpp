@@ -1,5 +1,4 @@
 #include "pdu24.hpp"
-#include "core_pins.h"
 #include "canzero/canzero.h"
 #include <Arduino.h>
 #include <InternalTemperature.h>
@@ -18,6 +17,7 @@ void pdu24::begin() {
     m_ctrl[i] = false;
   }
   pinMode(SDC_CTRL_PIN, OUTPUT);
+  analogReadResolution(12);
 }
 
 void pdu24::update() {
