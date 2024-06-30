@@ -1,5 +1,6 @@
 #include "pdu24.hpp"
 #include "canzero/canzero.h"
+#include "core_pins.h"
 #include <Arduino.h>
 #include <InternalTemperature.h>
 #include <algorithm>
@@ -17,6 +18,39 @@ void pdu24::begin() {
     m_ctrl[i] = false;
   }
   pinMode(SDC_CTRL_PIN, OUTPUT);
+
+  pinMode(LP_CHANNEL_6_19_CTRL_PIN, OUTPUT);
+  pinMode(LP_CHANNEL_7_18_CTRL_PIN, OUTPUT);
+  pinMode(LP_CHANNEL_8_17_CTRL_PIN, OUTPUT);
+  pinMode(LP_CHANNEL_9_16_CTRL_PIN, OUTPUT);
+  pinMode(LP_CHANNEL_10_15_CTRL_PIN, OUTPUT);
+  pinMode(LP_CHANNEL_11_14_CTRL_PIN, OUTPUT);
+  pinMode(LP_CHANNEL_12_41_CTRL_PIN, OUTPUT);
+  pinMode(LP_CHANNEL_24_40_CTRL_PIN, OUTPUT);
+  pinMode(LP_CHANNEL_25_39_CTRL_PIN, OUTPUT);
+  pinMode(LP_CHANNEL_26_38_CTRL_PIN, OUTPUT);
+
+  pinMode(LP_CHANNEL_6_19_SENSE_PIN, INPUT);
+  pinMode(LP_CHANNEL_7_18_SENSE_PIN, INPUT);
+  pinMode(LP_CHANNEL_8_17_SENSE_PIN, INPUT);
+  pinMode(LP_CHANNEL_9_16_SENSE_PIN, INPUT);
+  pinMode(LP_CHANNEL_10_15_SENSE_PIN, INPUT);
+  pinMode(LP_CHANNEL_11_14_SENSE_PIN, INPUT);
+  pinMode(LP_CHANNEL_12_41_SENSE_PIN, INPUT);
+  pinMode(LP_CHANNEL_24_40_SENSE_PIN, INPUT);
+  pinMode(LP_CHANNEL_25_39_SENSE_PIN, INPUT);
+  pinMode(LP_CHANNEL_26_38_SENSE_PIN, INPUT);
+
+  pinMode(HP_CHANNEL_2_23_CTRL_PIN, OUTPUT);
+  pinMode(HP_CHANNEL_3_22_CTRL_PIN, OUTPUT);
+  pinMode(HP_CHANNEL_4_21_CTRL_PIN, OUTPUT);
+  pinMode(HP_CHANNEL_5_20_CTRL_PIN, OUTPUT);
+
+  pinMode(HP_CHANNEL_2_23_SENSE_PIN, INPUT);
+  pinMode(HP_CHANNEL_3_2_SENSE_PIN, INPUT);
+  pinMode(HP_CHANNEL_4_21_SENSE_PIN, INPUT);
+  pinMode(HP_CHANNEL_5_20_SENSE_PIN, INPUT);
+
   analogReadResolution(12);
 }
 
