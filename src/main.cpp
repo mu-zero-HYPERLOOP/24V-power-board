@@ -4,6 +4,7 @@
  * @created     : Sonntag Apr 14, 2024 18:24:07 CEST
  */
 
+#include "core_pins.h"
 #include "print.h"
 #include "canzero/canzero.h"
 #include "sdc.h"
@@ -28,7 +29,6 @@ static ErrorLevelRangeCheck<EXPECT_UNDER>
 
 int main() {
   canzero_init();
-
   can_defaults();
   canzero_update_continue(canzero_get_time());
   
