@@ -27,7 +27,7 @@ static BoxcarFilter<Power, DEFAULT_FILTER_SIZE> total_power_filter(0_W);
 
 
 static pdu_channel_status
-pdu24_status_to_canzero_status(pdu24_channel_status status) {
+  pdu24_status_to_canzero_status(Pdu24ChannelStatus status) {
   switch (status) {
   case OFF:
     return pdu_channel_status_OFF;

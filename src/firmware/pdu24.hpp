@@ -1,9 +1,10 @@
 #pragma once
 #include "util/metrics.h"
+#include "util/timestamp.h"
 #include <array>
 
 
-enum pdu24_channel {
+enum Pdu24Channel {
   hp_2_23 = 0,
   hp_3_22,
   hp_4_21,
@@ -20,7 +21,7 @@ enum pdu24_channel {
   lp_26_38,
 };
 
-enum pdu24_channel_status { OFF, ON, SHORT };
+enum Pdu24ChannelStatus { OFF, ON, SHORT };
 
 class pdu24 {
 public:
@@ -28,11 +29,11 @@ public:
   
   static void update();
 
-  static Current sense(pdu24_channel channel);
+  static Current sense(Pdu24Channel channel);
 
-  static pdu24_channel_status status(pdu24_channel channel);
+  static Pdu24ChannelStatus status(Pdu24Channel channel);
 
-  static void control(pdu24_channel channel, bool active);
+  static void control(Pdu24Channel channel, bool active);
 
   static void set_sdc(bool closed);
 
@@ -97,9 +98,13 @@ private:
 
   static constexpr int SDC_CTRL_PIN = 32;
 
+  static constexpr Duration SHORT_CIRCUIT_TIMETHRESH = 1_ms;
+
   static std::array<Current, CHANNEL_COUNT> m_currents;
   static std::array<bool, CHANNEL_COUNT> m_shorts;
   static std::array<bool, CHANNEL_COUNT> m_ctrl;
+  static std::array<Timestamp, CHANNEL_COUNT> m_last_channel_ok;
+
 
   /* static Current m_currents[ */
 };
