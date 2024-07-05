@@ -19,6 +19,7 @@ void canzero_can0_wdg_timeout(uint8_t node_id) {
   debugPrintf("CAN0 Heartbeat Miss %u\n", node_id);
   canzero_set_error_heartbeat_miss(error_flag_ERROR);
   miss_can0[node_id] = true;
+  canzero_set_last_node_missed(node_id);
   debugPrintf("can0 timeout\n");
 }
 
@@ -26,6 +27,7 @@ void canzero_can1_wdg_timeout(uint8_t node_id) {
   debugPrintf("CAN1 Heartbeat Miss %u\n", node_id);
   canzero_set_error_heartbeat_miss(error_flag_ERROR);
   miss_can1[node_id] = true;
+  canzero_set_last_node_missed(node_id);
   debugPrintf("can1 timeout\n");
 }
 

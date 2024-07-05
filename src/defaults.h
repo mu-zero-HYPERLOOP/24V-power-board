@@ -8,6 +8,7 @@ static void can_defaults() {
   canzero_set_assertion_fault(error_flag_OK);
   canzero_set_error_any_short(error_flag_OK);
   canzero_set_error_heartbeat_miss(error_flag_OK);
+  canzero_set_last_node_missed(255);
 
   canzero_set_cooling_pump_channel_status(pdu_channel_status_OFF);
   canzero_set_cooling_pump_channel_current(0);
