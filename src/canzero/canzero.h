@@ -218,6 +218,10 @@ static inline float canzero_get_mcu_temperature() {
   extern float __oe_mcu_temperature;
   return __oe_mcu_temperature;
 }
+static inline error_flag canzero_get_error_mcu_temperature_invalid() {
+  extern error_flag __oe_error_mcu_temperature_invalid;
+  return __oe_error_mcu_temperature_invalid;
+}
 static inline error_level_config canzero_get_error_level_config_mcu_temperature() {
   extern error_level_config __oe_error_level_config_mcu_temperature;
   return __oe_error_level_config_mcu_temperature;
@@ -249,31 +253,32 @@ typedef struct {
   error_flag m_error_any_short;
   error_flag m_error_heartbeat_miss;
   error_level m_error_level_mcu_temperature;
+  error_flag m_error_mcu_temperature_invalid;
   uint8_t m_last_node_missed;
 } canzero_message_power_board24_stream_errors;
 static const uint32_t canzero_message_power_board24_stream_errors_id = 0x155;
 typedef struct {
   float m_mcu_temperature;
 } canzero_message_power_board24_stream_temperature;
-static const uint32_t canzero_message_power_board24_stream_temperature_id = 0xD8;
+static const uint32_t canzero_message_power_board24_stream_temperature_id = 0xF8;
 typedef struct {
   pdu_channel_status m_cooling_pump_channel_status;
   pdu_channel_status m_sdc_board_power_channel_status;
   pdu_channel_status m_sdc_signal_channel_status;
   pdu_channel_status m_fan_channel_status;
 } canzero_message_power_board24_stream_channel_status;
-static const uint32_t canzero_message_power_board24_stream_channel_status_id = 0x98;
+static const uint32_t canzero_message_power_board24_stream_channel_status_id = 0xB8;
 typedef struct {
   float m_cooling_pump_channel_current;
   float m_sdc_board_power_channel_current;
   float m_sdc_signal_channel_current;
   float m_fan_channel_current;
 } canzero_message_power_board24_stream_channel_currents;
-static const uint32_t canzero_message_power_board24_stream_channel_currents_id = 0x78;
+static const uint32_t canzero_message_power_board24_stream_channel_currents_id = 0x98;
 typedef struct {
   float m_total_power;
 } canzero_message_power_board24_stream_power_consumption;
-static const uint32_t canzero_message_power_board24_stream_power_consumption_id = 0xB8;
+static const uint32_t canzero_message_power_board24_stream_power_consumption_id = 0xD8;
 typedef struct {
   uint8_t m_node_id;
   uint8_t m_unregister;
@@ -378,6 +383,8 @@ static inline void canzero_set_mcu_temperature(float value){
   __oe_mcu_temperature = value;
 }
 
+void canzero_set_error_mcu_temperature_invalid(error_flag value);
+
 static inline void canzero_set_error_level_config_mcu_temperature(error_level_config value){
   extern error_level_config __oe_error_level_config_mcu_temperature;
   __oe_error_level_config_mcu_temperature = value;
@@ -431,6 +438,8 @@ void canzero_send_fan_channel_status();
 void canzero_send_last_node_missed();
 
 void canzero_send_mcu_temperature();
+
+void canzero_send_error_mcu_temperature_invalid();
 
 void canzero_send_error_level_config_mcu_temperature();
 
