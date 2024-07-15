@@ -110,7 +110,7 @@ static const node_id CANZERO_NODE_ID = node_id_power_board24;
 typedef struct {
   uint32_t id;
   uint8_t dlc;
-  uint8_t data[8];
+  __attribute__((aligned(alignof(uint64_t)))) uint8_t data[8];
 } canzero_frame;
 typedef enum : uint32_t {
   CANZERO_FRAME_IDE_BIT = 0x40000000, // 1 << 30
@@ -234,20 +234,20 @@ typedef struct {
   get_resp_header m_header;
   uint32_t m_data;
 } canzero_message_get_resp;
-static const uint32_t canzero_message_get_resp_id = 0x19D;
+static const uint32_t canzero_message_get_resp_id = 0x1BD;
 typedef struct {
   set_resp_header m_header;
 } canzero_message_set_resp;
-static const uint32_t canzero_message_set_resp_id = 0x1BD;
+static const uint32_t canzero_message_set_resp_id = 0x1DD;
 typedef struct {
   pdu_24v_state m_state;
   sdc_status m_sdc_status;
 } canzero_message_power_board24_stream_state;
-static const uint32_t canzero_message_power_board24_stream_state_id = 0x175;
+static const uint32_t canzero_message_power_board24_stream_state_id = 0x155;
 typedef struct {
   uint64_t m_config_hash;
 } canzero_message_power_board24_stream_config_hash;
-static const uint32_t canzero_message_power_board24_stream_config_hash_id = 0x135;
+static const uint32_t canzero_message_power_board24_stream_config_hash_id = 0x115;
 typedef struct {
   error_flag m_assertion_fault;
   error_flag m_error_any_short;
@@ -256,50 +256,50 @@ typedef struct {
   error_flag m_error_mcu_temperature_invalid;
   uint8_t m_last_node_missed;
 } canzero_message_power_board24_stream_errors;
-static const uint32_t canzero_message_power_board24_stream_errors_id = 0x155;
+static const uint32_t canzero_message_power_board24_stream_errors_id = 0x135;
 typedef struct {
   float m_mcu_temperature;
 } canzero_message_power_board24_stream_temperature;
-static const uint32_t canzero_message_power_board24_stream_temperature_id = 0xF8;
+static const uint32_t canzero_message_power_board24_stream_temperature_id = 0x58;
 typedef struct {
   pdu_channel_status m_cooling_pump_channel_status;
   pdu_channel_status m_sdc_board_power_channel_status;
   pdu_channel_status m_sdc_signal_channel_status;
   pdu_channel_status m_fan_channel_status;
 } canzero_message_power_board24_stream_channel_status;
-static const uint32_t canzero_message_power_board24_stream_channel_status_id = 0xB8;
+static const uint32_t canzero_message_power_board24_stream_channel_status_id = 0x179;
 typedef struct {
   float m_cooling_pump_channel_current;
   float m_sdc_board_power_channel_current;
   float m_sdc_signal_channel_current;
   float m_fan_channel_current;
 } canzero_message_power_board24_stream_channel_currents;
-static const uint32_t canzero_message_power_board24_stream_channel_currents_id = 0x98;
+static const uint32_t canzero_message_power_board24_stream_channel_currents_id = 0x159;
 typedef struct {
   float m_total_power;
 } canzero_message_power_board24_stream_power_consumption;
-static const uint32_t canzero_message_power_board24_stream_power_consumption_id = 0xD8;
+static const uint32_t canzero_message_power_board24_stream_power_consumption_id = 0x199;
 typedef struct {
   uint8_t m_node_id;
   uint8_t m_unregister;
   uint8_t m_ticks_next;
 } canzero_message_heartbeat_can0;
-static const uint32_t canzero_message_heartbeat_can0_id = 0x1D4;
+static const uint32_t canzero_message_heartbeat_can0_id = 0x1F4;
 typedef struct {
   uint8_t m_node_id;
   uint8_t m_unregister;
   uint8_t m_ticks_next;
 } canzero_message_heartbeat_can1;
-static const uint32_t canzero_message_heartbeat_can1_id = 0x1D3;
+static const uint32_t canzero_message_heartbeat_can1_id = 0x1F3;
 typedef struct {
   get_req_header m_header;
 } canzero_message_get_req;
-static const uint32_t canzero_message_get_req_id = 0x19E;
+static const uint32_t canzero_message_get_req_id = 0x1BE;
 typedef struct {
   set_req_header m_header;
   uint32_t m_data;
 } canzero_message_set_req;
-static const uint32_t canzero_message_set_req_id = 0x1BE;
+static const uint32_t canzero_message_set_req_id = 0x1DE;
 typedef struct {
   pdu_24v_command m_power_board24_command;
   bool_t m_power_board24_cooling_pump_channel_ctrl;

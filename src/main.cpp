@@ -48,6 +48,8 @@ int main() {
     // =========== Temperature ======
     if (mcu_temperature_interval.next()) {
       Temperature mcu_temperature = pdu24::read_mcu_temperature();
+      const bool sensible = mcu_temperature >= 0_Celcius && mcu_temperature <= 200_Celcius;
+      canzero_set_error_mcu_temperature_invalid(sensible ? error_flag_OK : error_flag_ERROR);
       mcu_temperature_filter.push(mcu_temperature);
       canzero_set_mcu_temperature(mcu_temperature_filter.get().as_celcius());
       mcu_temp_check.check();

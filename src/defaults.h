@@ -25,6 +25,7 @@ static void can_defaults() {
   canzero_set_fan_channel_current(0);
 
   canzero_set_error_level_mcu_temperature(error_level_OK);
+  canzero_set_error_mcu_temperature_invalid(error_flag_OK);
   canzero_set_error_level_config_mcu_temperature(error_level_config{
       .m_info_thresh = 60,
       .m_info_timeout = 1,
