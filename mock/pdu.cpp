@@ -26,7 +26,7 @@ void pdu24::begin() {
 void pdu24::update() {
 }
 
-Current pdu24::sense(pdu24_channel channel) { 
+Current pdu24::sense(Pdu24Channel channel) { 
   if (m_ctrl[channel]) {
     if (channel <= hp_5_20) {
       return Current(hp_dist(gen));
@@ -38,11 +38,11 @@ Current pdu24::sense(pdu24_channel channel) {
   }
 }
 
-pdu24_channel_status pdu24::status(pdu24_channel channel) {
+Pdu24ChannelStatus pdu24::status(Pdu24Channel channel) {
   return m_ctrl[channel] ? ON : OFF;
 }
 
-void pdu24::control(pdu24_channel channel, bool active) {
+void pdu24::control(Pdu24Channel channel, bool active) {
   m_ctrl[channel] = active;
 }
 

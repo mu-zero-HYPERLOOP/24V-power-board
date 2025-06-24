@@ -36,6 +36,7 @@ static pdu_channel_status
   case SHORT:
     return pdu_channel_status_SHORT_CIRCUIT;
   }
+  return pdu_channel_status_SHORT_CIRCUIT;
 }
 
 void channel_control(pdu_24v_state state) {
