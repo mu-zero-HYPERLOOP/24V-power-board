@@ -52,12 +52,14 @@ void channel_control(pdu_24v_state state) {
       pdu24::control(SDC_POWER_CHANNEL, true);
       pdu24::control(SDC_SIGNAL_CHANNEL, true);
       pdu24::control(FAN_CHANNEL, true);
+      pdu24::control(END_SWITCH_PWR, true);
       break;
     case pdu_24v_state_CHANNELS_OFF:
       pdu24::control(COOLING_PUMP_CHANNEL, canzero_get_overwrite_cooling() == tristate_t_TRUE);
       pdu24::control(SDC_POWER_CHANNEL, false);
       pdu24::control(SDC_SIGNAL_CHANNEL, false);
       pdu24::control(FAN_CHANNEL, false);
+      pdu24::control(END_SWITCH_PWR, false);
       break;
     case pdu_24v_state_INIT:
       break;
