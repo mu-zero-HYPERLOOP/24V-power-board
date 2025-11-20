@@ -10,7 +10,7 @@
 
 canzero gen power_board24 src/canzero
 cmake -Bbuild
-make -C build
+cmake --build build -j8
 alacritty -e ./build/power-board24&
 
 
