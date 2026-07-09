@@ -210,6 +210,14 @@ static inline pdu_channel_status canzero_get_fan_channel_status() {
   extern pdu_channel_status __oe_fan_channel_status;
   return __oe_fan_channel_status;
 }
+static inline float canzero_get_antenna_channel_current() {
+  extern float __oe_antenna_channel_current;
+  return __oe_antenna_channel_current;
+}
+static inline pdu_channel_status canzero_get_antenna_channel_status() {
+  extern pdu_channel_status __oe_antenna_channel_status;
+  return __oe_antenna_channel_status;
+}
 static inline uint8_t canzero_get_last_node_missed() {
   extern uint8_t __oe_last_node_missed;
   return __oe_last_node_missed;
@@ -266,6 +274,7 @@ typedef struct {
   pdu_channel_status m_sdc_board_power_channel_status;
   pdu_channel_status m_sdc_signal_channel_status;
   pdu_channel_status m_fan_channel_status;
+  pdu_channel_status m_antenna_channel_status;
 } canzero_message_power_board24_stream_channel_status;
 static const uint32_t canzero_message_power_board24_stream_channel_status_id = 0x115;
 typedef struct {
@@ -273,6 +282,7 @@ typedef struct {
   float m_sdc_board_power_channel_current;
   float m_sdc_signal_channel_current;
   float m_fan_channel_current;
+  float m_antenna_channel_current;
 } canzero_message_power_board24_stream_channel_currents;
 static const uint32_t canzero_message_power_board24_stream_channel_currents_id = 0xF5;
 typedef struct {
@@ -376,6 +386,13 @@ static inline void canzero_set_fan_channel_current(float value){
 
 void canzero_set_fan_channel_status(pdu_channel_status value);
 
+static inline void canzero_set_antenna_channel_current(float value){
+  extern float __oe_antenna_channel_current;
+  __oe_antenna_channel_current = value;
+}
+
+void canzero_set_antenna_channel_status(pdu_channel_status value);
+
 void canzero_set_last_node_missed(uint8_t value);
 
 static inline void canzero_set_mcu_temperature(float value){
@@ -434,6 +451,10 @@ void canzero_send_sdc_signal_channel_status();
 void canzero_send_fan_channel_current();
 
 void canzero_send_fan_channel_status();
+
+void canzero_send_antenna_channel_current();
+
+void canzero_send_antenna_channel_status();
 
 void canzero_send_last_node_missed();
 

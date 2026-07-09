@@ -11,3 +11,5 @@ constexpr Pdu24Channel SDC_SIGNAL_CHANNEL = lp_24_40;
 constexpr Pdu24Channel FAN_CHANNEL = lp_9_16;
 
 constexpr Pdu24Channel END_SWITCH_PWR = lp_8_17;
+
+constexpr Pdu24Channel ANTENNA_CHANNEL = lp_6_19;
