@@ -218,6 +218,14 @@ static inline pdu_channel_status canzero_get_antenna_channel_status() {
   extern pdu_channel_status __oe_antenna_channel_status;
   return __oe_antenna_channel_status;
 }
+static inline float canzero_get_misc_channel_current() {
+  extern float __oe_misc_channel_current;
+  return __oe_misc_channel_current;
+}
+static inline pdu_channel_status canzero_get_misc_channel_status() {
+  extern pdu_channel_status __oe_misc_channel_status;
+  return __oe_misc_channel_status;
+}
 static inline uint8_t canzero_get_last_node_missed() {
   extern uint8_t __oe_last_node_missed;
   return __oe_last_node_missed;
@@ -393,6 +401,16 @@ static inline void canzero_set_antenna_channel_current(float value){
 
 void canzero_set_antenna_channel_status(pdu_channel_status value);
 
+static inline void canzero_set_misc_channel_current(float value){
+  extern float __oe_misc_channel_current;
+  __oe_misc_channel_current = value;
+}
+
+static inline void canzero_set_misc_channel_status(pdu_channel_status value){
+  extern pdu_channel_status __oe_misc_channel_status;
+  __oe_misc_channel_status = value;
+}
+
 void canzero_set_last_node_missed(uint8_t value);
 
 static inline void canzero_set_mcu_temperature(float value){
@@ -455,6 +473,10 @@ void canzero_send_fan_channel_status();
 void canzero_send_antenna_channel_current();
 
 void canzero_send_antenna_channel_status();
+
+void canzero_send_misc_channel_current();
+
+void canzero_send_misc_channel_status();
 
 void canzero_send_last_node_missed();
 

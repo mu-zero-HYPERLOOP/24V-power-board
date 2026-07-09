@@ -25,6 +25,9 @@ static BoxcarFilter<Current, DEFAULT_FILTER_SIZE> fan_current_filter(0_A);
 static Interval antenna_sense_interval(DEFAULT_SENSE_FREQUENCY);
 static BoxcarFilter<Current, DEFAULT_FILTER_SIZE> antenna_current_filter(0_A);
 
+static Interval misc_sense_interval(DEFAULT_SENSE_FREQUENCY);
+static BoxcarFilter<Current, DEFAULT_FILTER_SIZE> misc_current_filter(0_A);
+
 static Interval power_sense_interval(DEFAULT_SENSE_FREQUENCY);
 static BoxcarFilter<Power, DEFAULT_FILTER_SIZE> total_power_filter(0_W);
 
@@ -57,6 +60,7 @@ void channel_control(pdu_24v_state state) {
       pdu24::control(FAN_CHANNEL, true);
       pdu24::control(END_SWITCH_PWR, true);
       pdu24::control(ANTENNA_CHANNEL, true);
+      pdu24::control(MISC_CHANNEL, true);
       break;
     case pdu_24v_state_CHANNELS_OFF:
       pdu24::control(COOLING_PUMP_CHANNEL, canzero_get_overwrite_cooling() == tristate_t_TRUE);
@@ -65,6 +69,7 @@ void channel_control(pdu_24v_state state) {
       pdu24::control(FAN_CHANNEL, false);
       pdu24::control(END_SWITCH_PWR, false);
       pdu24::control(ANTENNA_CHANNEL, false);
+      pdu24::control(MISC_CHANNEL, false);
       break;
     case pdu_24v_state_INIT:
       break;
@@ -114,6 +119,15 @@ void channel_control(pdu_24v_state state) {
     canzero_set_antenna_channel_status(
       pdu24_status_to_canzero_status(pdu24::status(ANTENNA_CHANNEL)));
 
+// =========== MISC CHANNEL ========
+  if (misc_sense_interval.next()) {
+    misc_current_filter.push(pdu24::sense(MISC_CHANNEL));
+    canzero_set_misc_channel_current(
+        static_cast<float>(misc_current_filter.get()));
+  }
+    canzero_set_misc_channel_status(
+      pdu24_status_to_canzero_status(pdu24::status(MISC_CHANNEL)));
+    
 
   if (power_sense_interval.next()) {
     total_power_filter.push(pdu24::total_power_output());
